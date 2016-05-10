@@ -1,0 +1,64 @@
+/* app css stylesheet */
+
+
+@font-face {
+  font-family: FreeSerif;
+  src: url(../fonts/FreeSerif.otf);
+}
+
+body {
+  padding-top: 20px;
+}
+
+.music-notes {
+
+}
+
+.note-text {
+  font-weight: bold;
+}
+.measure {
+
+}
+
+.measure .string,
+.measure .measure-begin {
+  stroke: #000000; 
+  stroke-width: 0.5;
+}
+
+.ruler-tick-1 {
+  stroke-width: 2;
+}
+
+.ruler-tick-2 {
+  stroke-width: 1.5;
+}
+
+.transparent {
+  fill-opacity: 0;
+}
+.string-1 {
+  /* stroke: #008A00; */
+  fill: #008A00; 
+}
+
+.string-2 {
+  fill: #FF0000; 
+ }
+
+.string-3 {
+  fill: #0000FF; 
+}
+
+.string-4 {
+  fill: #F78C00; 
+}
+
+.string-5 {
+  fill: #00BAD6; 
+}
+
+.string-6 {
+  fill: #7300FF;
+}
