@@ -3,14 +3,13 @@
       ng-attr-x="{{ noteXPosition(note.pos) + 'em'}}" ng-attr-y="{{ stringYOffset(note.string) - 0.05*stringOffset + 'em' }}"
       ng-attr-width="{{ noteDurationDistance(note) + 'em'}}" ng-attr-height="{{ 0.1*stringOffset + 'em' }}" ></rect>
 
-<!--
-<circle ng-click="open(note, measure)"
-    ng-attr-class="string-{{note.string}}"
+
+<circle class="selected-note" ng-if="note.selected"
         ng-attr-cx="{{ noteXPosition(note.pos) + 'em'}}"
         ng-attr-cy="{{ stringYOffset(note.string) + 'em'}}" 
         ng-attr-r="{{noteCircleRadius}}em"  />
--->
-<text class="note-text"
+
+<text class="note-text" ng-if="!note.selected"
       ng-click="open($event, note, measure)"
       ng-attr-x="{{ noteXPosition(note.pos) + 'em'}}"
       ng-attr-y="{{ stringYOffset(note.string) + 'em'}}"

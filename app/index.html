@@ -4,7 +4,6 @@
   <meta charset="utf-8">
   <title>Tablature Viewer</title>
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
   <link rel="stylesheet" href="css/app.css">
   <script src="bower_components/angular/angular.js"></script>
   <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
@@ -17,88 +16,103 @@
 
   <div class="container-fluid">
     <div  >
-      <svg ng-repeat="measure in measures" class="measure" 
+      <svg ng-repeat="measure in measures" class="measure" ng-attr-id="measure-{{$index}}"
            style="display: inline-block" height="200" ng-attr-width="{{measureWidth(measure)}}em">
-        <g ng-repeat="str in strings">
-          <line class="string"
-              x1="0" ng-attr-y1="{{ stringYOffset(str) + 'em' }}"
-              x2="100%" ng-attr-y2="{{ stringYOffset(str) + 'em' }}"
-              ng-click="clickLine($event, str, measure)"/>
-          
-          <rect class="transparent"
-              x1="0" ng-attr-y="{{ stringYOffset(str) - 0.2*stringOffset + 'em' }}"
-              width="100%" ng-attr-height="{{ 0.4*stringOffset + 'em' }}"
-              ng-click="clickLine($event, str, measure)" />
+        <g class="strings">
+          <g ng-repeat="str in strings">
+            <line class="string"
+                x1="0" ng-attr-y1="{{ stringYOffset(str) + 'em' }}"
+                x2="100%" ng-attr-y2="{{ stringYOffset(str) + 'em' }}"
+                ng-click="clickLine($event, str, measure)"/>
+
+            <rect class="transparent"
+                x1="0" ng-attr-y="{{ stringYOffset(str) - 0.2*stringOffset + 'em' }}"
+                width="100%" ng-attr-height="{{ 0.4*stringOffset + 'em' }}"
+                ng-click="clickLine($event, str, measure)" />
+          </g>
         </g>
         
         <line class="measure-begin" x1="1" x2="1" ng-attr-y1="{{stringYOffset(1) + 'em'}}"
                   ng-attr-y2="{{stringYOffset(6) + 'em'}}" />
         
-        <line class="string"
+        <g class="ruler">
+          <line class="string"
                 x1="0" ng-attr-y1="{{ stringYOffset(7) + 'em' }}"
                 x2="100%" ng-attr-y2="{{ stringYOffset(7) + 'em' }}"
                 />
-        
-        <g ng-repeat="sub in test track by $index" >
-          <line class="tick" style="stroke: #000000" ng-attr-class="ruler-tick-{{sub}}"
-                ng-attr-x1="{{ noteXPosition(1 + $index/subdivisions) + 'em'}}" ng-attr-y1="{{ stringYOffset(7) - 0.25*stringOffset - 0.7*stringOffset/sub + 'em' }}"
-                ng-attr-x2="{{ noteXPosition(1 + $index/subdivisions) + 'em'}}" ng-attr-y2="{{ stringYOffset(7) + 'em' }}"
-                />
+
+          <g ng-repeat="sub in test track by $index" >
+            <line class="tick" style="stroke: #000000" ng-attr-class="ruler-tick-{{sub}}"
+                  ng-attr-x1="{{ noteXPosition(1 + $index/subdivisions) + 'em'}}" ng-attr-y1="{{ stringYOffset(7) - 0.25*stringOffset - 0.7*stringOffset/sub + 'em' }}"
+                  ng-attr-x2="{{ noteXPosition(1 + $index/subdivisions) + 'em'}}" ng-attr-y2="{{ stringYOffset(7) + 'em' }}"
+                  />
+          </g>
         </g>
         
-        <g ng-repeat="cnt in measure.content" >
-          <g ng-init="note = cnt" ng-include="'partials/note.html'"></g>
+        <g class="notes">
+          <g ng-repeat="cnt in measure.content" >
+            <g ng-init="note = cnt" ng-include="'partials/note.html'"></g>
+          </g>
         </g>
+        
       </svg>
       
-      <script type="text/ng-template" id="myModalContent.html">
-        <div class="modal-body">
-          <div class="form-group">
+    </div>
+    <button ng-click="play()">Sound</button><div>{{measureEndTime}}</div>
+  </div>
+  
+  <div id="panel" class="panel panel-default" style="width: 42em; position: absolute; top: 20px; left: 20px; display: none; margin-left: 5px">
+    <div class="panel-body form-inline" ng-controller="NoteEditCtrl as noteCtrl">
+      <div class="arrow"></div>
+      <form novalidate>
+        <button type="button" class="close pull-right" ng-click="close()" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button> 
+        <div class="form-group">
             <label>String</label>
-            <select class="form-control" ng-model="note.string" ng-change="setMovedNoteDuration()" ng-options="o for o in strings"></select>
+            <select class="form-control" ng-model="note.string" ng-change="setMovedNoteDuration(); updateState();" ng-options="o for o in availableStrings"></select>
           </div>
           <div class="form-group">
             <label>Fret</label>
             <select class="form-control" ng-model="note.fret" ng-options="o for o in frets"></select>
           </div>
           <div class="form-group">
-            <label>Nudge</label>
+            <label>Beats</label>
+            <span style="margin-right: 0.5em; display: inline-block; width: 2em; text-align: center">{{note.dur}}</span>
             <div class="btn-group" role="group" aria-label="">
-              <button type="button" class="btn btn-default" aria-label="Nudge Left">
-                <span class="glyphicon glyphicon-arrow-left" aria-hidden="true"></span>
+              <button type="button" class="btn btn-default" ng-click="setBeats()" aria-label="Nudge Left">
+                <span class="" aria-hidden="true">=</span>
+              </button>
+              <button type="button" ng-disabled="!canDecreaseBeats" ng-click="decreaseBeats()" class="btn btn-default" aria-label="">
+                <span class="" aria-hidden="true">-</span>
+              </button>
+              <button type="button" ng-disabled="!canIncreaseBeats" ng-click="increaseBeats()" class="btn btn-default" aria-label="">
+                <span class="" aria-hidden="true">+</span>
               </button>
             </div>
+            <select class="form-control" style="width: auto; display: inline-block" ng-change="updateState()" ng-model="beatChangeValue" ng-options="o as o.label for o in beatChangeAmounts"></select>
           </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
-            <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
-        </div>
-    </script>
+          <div class="form-group">
+            <label>Move</label>
+            <div class="btn-group" role="group" aria-label="">
+              <button type="button" ng-disabled="!canMoveBackward" ng-click="moveNoteBackward()" class="btn btn-default" aria-label="">
+                <span class="" aria-hidden="true">-</span>
+              </button>
+              <button type="button" ng-disabled="!canMoveForward" ng-click="moveNoteForward()" class="btn btn-default" aria-label="">
+                <span class="" aria-hidden="true">+</span>
+              </button>
+            </div>
+            <select class="form-control" style="width: auto; display: inline-block" ng-change="updateState()" ng-model="moveValue" ng-options="o as o.label for o in beatChangeAmounts"></select>
+          </div>   
+          <div class="form-group">
+              <label>Delete</label>
+              <button type="button" ng-click="deleteNote()" class="btn btn-default" aria-label="">
+                <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+              </button>
+          </div>
+    </form>  
     </div>
-    <button ng-click="play()">Sound</button><div>{{measureEndTime}}</div>
-  </div>
-  <svg height="6em" width="3em">
-    <text text-anchor="middle" x="1.35em" y="1em" style="font-weight: bold;">24</text>
     
-    <svg viewBox="0 0 1 1" height="1em" width="1em" y="0.1em" x="2em" >
-      <polygon points="0,0.25 0,0.75 0.5,0.5"  />
-    </svg>
-    <svg viewBox="0 0 1 1" height="1em" width="1em" y="0.1em" x="2em" >
-      <line x1="0.1" x2="0.1" y1="0" y2="1" style="stroke: black; stroke-width: 0.1" />
-    </svg>
-    <!--<ellipse cx="2em" cy="2em" rx="0.3em" ry="0.24em" style="fill: black"/>
-    <ellipse cx="2em" cy="2em" rx="0.24em" ry="0.12em" style="fill: white"/>
-    <line x1="2.2em" x2="2.2em" y1="1.2em" y2="4.05em" style="stroke: black; stroke-width: 0.1em" /> -->
-  </svg>
-  text
-  
-  {{test}}
-  
-  <div id="panel" class="panel panel-default" style="width: 42em; position: absolute; top: 20px; left: 20px;">
-    <div class="panel-body">
-      Basic panel example
-    </div>
   </div>
 </body>
 </html>

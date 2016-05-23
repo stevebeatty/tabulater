@@ -7,6 +7,45 @@ var tabApp = angular.module('tabApp', ['ui.bootstrap']);
 tabApp.factory('noteMethodsFactory', function() {
     var fac = {};
     
+    fac.addNote = function(measure, note) {
+      measure.content.push(note);
+      fac.sortMeasure(measure);
+    }
+    
+    fac.deleteNote = function(measure, note) {
+      var idx = measure.content.indexOf(note);
+      if (idx >= 0) {
+        measure.content.splice(idx, 1);
+        fac.sortMeasure(measure);
+      }
+    }
+    
+    fac.sortMeasure = function(measure) {
+      measure.content.sort(function (a, b) {
+        var d = a.pos - b.pos;
+        if (d !== 0) return d;
+
+        return a.string - b.string;
+      });
+    }
+    
+    fac.numberSequence = function(start, end) {
+      var arr = [];
+      for (var i = start; i <= end; i++) {
+        arr.push(i);
+      }
+      
+      return arr;
+    }
+    
+    fac.setStrings = function(count) {
+      fac.strings = fac.numberSequence(1, count);
+    }
+    
+    fac.setFrets = function(count) {
+      fac.frets = fac.numberSequence(0, count - 1);
+    }
+    
     /**
      * 
      * @param {type} measure

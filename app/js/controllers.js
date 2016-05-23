@@ -24,17 +24,12 @@ tabApp.controller('TabViewCtrl', ['$scope', '$http', '$uibModal', '$timeout',
     });
   });
   
-  $scope.fontSize = 12;
-  $scope.text = '\u2669';
-  $scope.width = 0;
-  
-  $scope.strings = [1, 2, 3, 4, 5, 6];
   $scope.stringsTopOffset = 1.5;
   
-  $scope.frets = [];
-  for (var i = 0; i <= 24; i++) {
-      $scope.frets.push(i);
-  }
+  noteMethods.setStrings(6);
+  noteMethods.setFrets(24);
+  $scope.strings = noteMethods.strings;
+  $scope.frets = noteMethods.frets;
   
   $scope.beatsPerMinute = 80;
   
@@ -158,6 +153,7 @@ tabApp.controller('TabViewCtrl', ['$scope', '$http', '$uibModal', '$timeout',
       ]
     }
   ];
+  noteMethods.measures = $scope.measures;
   
   $scope.clickLine = function(event, string, measure) {
     console.log('click string ' + string);
@@ -167,7 +163,7 @@ tabApp.controller('TabViewCtrl', ['$scope', '$http', '$uibModal', '$timeout',
         y = event.clientY - bound.top,
         w = x/bound.width,
         pos = $scope.closestNotePosition(measure, w),
-        note = { pos: pos, string: string, fret: 10 },
+        note = { pos: pos, string: string, fret: 0 },
         dur = noteMethods.findNextNoteDistance(measure, note),
         prevD = noteMethods.findPreviousNoteDistance(measure, note);
     
@@ -180,13 +176,9 @@ tabApp.controller('TabViewCtrl', ['$scope', '$http', '$uibModal', '$timeout',
     
     console.log("x: "+x+" y:"+y + ' ' + bound.left + ' ' + pos + ' ' + w + ' prev: ' + prevD);
     
-    measure.content.push(note);
-    measure.content.sort(function (a, b) {
-      var d = a.pos - b.pos;
-      if (d !== 0) return d;
-      
-      return a.string - b.string;
-    });
+    noteMethods.addNote(measure, note);
+    
+    $scope.open(event, note, measure);
   };
   
   $scope.stringYOffset = function(stringNum) {
@@ -285,7 +277,7 @@ tabApp.controller('TabViewCtrl', ['$scope', '$http', '$uibModal', '$timeout',
         $scope.nextMeasure = -1;
       }
     }
-  }
+  };
   
   $scope.createNote = function (detune, start, stop, sound) {
     var src = $scope.audioContext.createBufferSource();
@@ -301,27 +293,37 @@ tabApp.controller('TabViewCtrl', ['$scope', '$http', '$uibModal', '$timeout',
    src.stop(stop);
   };
   
- 
   
   $scope.open = function (event, note, measure) {
-     console.log('trg: ' + event.target);
-     
+    console.log('trg: ' + event.target);
+    var panel = $('#panel');
     
-    $('#panel').position({
+    panel.show();
+    
+    var measureEl = $(event.target).closest('.measure'),
+        rulerEl = measureEl.children('.ruler'),
+        pos = rulerEl.position(),
+        height = rulerEl[0].getBBox().height;
+    
+    var diff = pos.top - $(event.target).position().top;
+    
+     panel.position({
        my: 'center top',
-       at: 'center bottom',
+       at: 'center bottom+' + (diff + height),
        of: event.target,
        collision: 'fit'
      });
-     
-     
-     
+    
+    console.log('parent measure: ' +  measureEl.attr('id') + ' ruler top: ' + pos.top + ' height: ' + height + ' calc top: ' + diff);
+    
     console.log('max dur: ' + noteMethods.findNextNoteDistance(measure, note) +
                 ' prev d: ' + noteMethods.findPreviousNoteDistance(measure, note) +
                 ' avail strs: ' + noteMethods.allMoveOptionsForNote(measure, note, $scope.strings));
-
-    var strs = noteMethods.allMoveOptionsForNote(measure, note, $scope.strings);
-
+  
+    
+    
+    $scope.$broadcast('NoteEdit', {note: note, measure: measure, strings: $scope.strings});
+/*
     var modalInstance = $uibModal.open({
       animation: $scope.animationsEnabled,
       templateUrl: 'myModalContent.html',
@@ -339,25 +341,111 @@ tabApp.controller('TabViewCtrl', ['$scope', '$http', '$uibModal', '$timeout',
           return measure;
         }
        }
-      });
-    };
+      }); */
+      
+    }; 
+    
 }]);
 
-tabApp.controller('NoteEditCtrl', [ '$scope', '$uibModalInstance', 'noteMethodsFactory',
-  'note', 'strings', 'frets', 'measure', 
-  function ($scope, $uibModalInstance, noteMethods, note, strings, frets, measure) {
+tabApp.controller('NoteEditCtrl', [ '$scope', 'noteMethodsFactory',
+  
+  function ($scope, noteMethods) {
 
-  $scope.note = note;
-  $scope.measure = measure;
-  $scope.strings = strings;
-  $scope.frets = frets;
-
-  $scope.ok = function () {
-    $uibModalInstance.close($scope.note);
+  $scope.beatChangeType = '=';
+  $scope.beatChangeOptions = ['=', '+', '-'];
+  $scope.beatChangeAmounts = [{label: '1', value: 1}, {label: '\u00bd', value: 0.5}, 
+    {label: '\u00bc', value: 0.25}];
+  $scope.beatChangeValue = $scope.beatChangeAmounts[0];
+  
+  $scope.moveValue = $scope.beatChangeAmounts[0];
+  $scope.canMoveForward = false;
+  $scope.canMoveBackward = false;
+  
+  $scope.canIncreaseBeats = false;
+  $scope.canDecreaseBeats = false;
+  $scope.canSetBeats = false;
+  
+  $scope.close = function() {
+    $('#panel').hide();
+    $scope.removeSelection();
   };
-
-  $scope.cancel = function () {
-    $uibModalInstance.dismiss('cancel');
+  
+  $scope.$on('NoteEdit', function(event, args) {
+    console.log('noteedit');
+  
+    $scope.removeSelection();
+    
+    $scope.note = args.note;
+    $scope.note.selected = true;
+    $scope.measure = args.measure;
+    $scope.strings = args.strings;
+    
+    $scope.updateState();
+  });
+  
+  $scope.removeSelection = function() {
+    if ($scope.note) {
+      delete $scope.note.selected;
+    }
+  };
+  
+  $scope.updateState = function() {
+    var nextDist = noteMethods.findNextNoteDistance($scope.measure, $scope.note),
+        prevDist = noteMethods.findPreviousNoteDistance($scope.measure, $scope.note);
+    
+    console.log('next dist ' + nextDist + ' prevDist ' + prevDist);
+    
+    $scope.updateMoveOptions(prevDist, nextDist);
+    $scope.updateBeatOptions(nextDist);
+    
+    $scope.availableStrings = noteMethods.allMoveOptionsForNote($scope.measure,
+      $scope.note, $scope.strings);
+  };
+  
+  $scope.updateMoveOptions = function(prevDist, nextDist) {
+    var minDur = 1/$scope.subdivisions;
+    $scope.canMoveBackward = prevDist > 0;
+    $scope.canMoveForward = (nextDist - minDur > 0);
+  };
+  
+  $scope.moveNoteForward = function() {
+    var minDur = 1/$scope.subdivisions,
+      nextDist = noteMethods.findNextNoteDistance($scope.measure, $scope.note),
+      moveIncr = Math.max(Math.min($scope.moveValue.value, nextDist - minDur), 0);
+    $scope.note.pos += moveIncr;
+    $scope.setMovedNoteDuration();
+    $scope.updateState();
+  };
+  
+  $scope.moveNoteBackward = function() {
+    var moveIncr = $scope.moveValue.value,
+        prevDist = noteMethods.findPreviousNoteDistance($scope.measure, $scope.note);
+    $scope.note.pos -= Math.min(moveIncr, prevDist);
+    $scope.updateState();
+  };
+  
+  $scope.updateBeatOptions = function(nextDist) {
+    var minDur = 1/$scope.subdivisions;
+    $scope.canDecreaseBeats = ($scope.note.dur - minDur) > 0;
+    $scope.canIncreaseBeats = (nextDist - $scope.note.dur) > 0;
+  };
+  
+  $scope.increaseBeats = function() {
+    var nextDist = noteMethods.findNextNoteDistance($scope.measure, $scope.note);
+    $scope.note.dur = Math.min($scope.beatChangeValue.value + $scope.note.dur, nextDist);
+    $scope.updateState();
+  };
+  
+  $scope.decreaseBeats = function() {
+    var minDur = 1/$scope.subdivisions;
+    $scope.note.dur = Math.max($scope.note.dur - $scope.beatChangeValue.value, minDur);
+    $scope.updateState();
+  };
+  
+  $scope.setBeats = function() {
+    var minDur = 1/$scope.subdivisions;
+    $scope.note.dur = Math.max($scope.beatChangeValue.value, minDur);
+    $scope.updateState();
   };
   
   $scope.setMovedNoteDuration = function() {
@@ -365,4 +453,9 @@ tabApp.controller('NoteEditCtrl', [ '$scope', '$uibModalInstance', 'noteMethodsF
     $scope.note.dur = Math.min($scope.note.dur, d);
     console.log('dist: ' + d);
   };
+  
+  $scope.deleteNote = function() {
+    noteMethods.deleteNote($scope.measure, $scope.note);
+    $scope.close();
+  }
 }]);

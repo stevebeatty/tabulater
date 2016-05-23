@@ -62,3 +62,11 @@ body {
 .string-6 {
   fill: #7300FF;
 }
+
+.selected-note {
+  fill: #70FFB5;
+}
+
+.form-inline .form-group {
+  margin-top: 10px;
+}
