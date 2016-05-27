@@ -1,0 +1,55 @@
+<div id="panel" class="panel panel-default bottom" style="width: 42em; position: absolute; top: 20px; left: 20px; margin-left: 5px">
+  <div class="arrow"></div>
+  <div class="panel-body form-inline">  
+    <form novalidate>
+      <button type="button" class="close pull-right" ng-click="$ctrl.close()" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button> 
+      <div class="form-group">
+        <label>String</label>
+        <select class="form-control" ng-model="$ctrl.note.string" ng-change="$ctrl.setMovedNoteDuration(); $ctrl.updateState();" ng-options="o for o in $ctrl.availableStrings"></select>
+      </div>
+      <div class="form-group">
+        <label>Fret</label>
+        <select class="form-control" ng-model="$ctrl.note.fret" ng-options="o for o in $ctrl.song.frets"></select>
+      </div>
+      <div class="form-group">
+        <label>Beats</label>
+        <span style="margin-right: 0.5em; display: inline-block; width: 2em; text-align: center">{{$ctrl.note.dur}}</span>
+        <div class="btn-group" role="group" aria-label="">
+          <button type="button" class="btn btn-default" ng-click="$ctrl.setBeats()" aria-label="Nudge Left">
+            <span class="" aria-hidden="true">=</span>
+          </button>
+          <button type="button" ng-disabled="!$ctrl.canDecreaseBeats" ng-click="$ctrl.decreaseBeats()" class="btn btn-default" aria-label="">
+            <span class="" aria-hidden="true">-</span>
+          </button>
+          <button type="button" ng-disabled="!$ctrl.canIncreaseBeats" ng-click="$ctrl.increaseBeats()" class="btn btn-default" aria-label="">
+            <span class="" aria-hidden="true">+</span>
+          </button>
+        </div>
+        <select class="form-control" style="width: auto; display: inline-block" ng-change="$ctrl.updateState()" ng-model="$ctrl.beatChangeValue" ng-options="o as o.label for o in $ctrl.beatChangeAmounts"></select>
+      </div>
+      <div class="form-group">
+        <label>Move</label>
+        <div class="btn-group" role="group" aria-label="">
+          <button type="button" ng-disabled="!$ctrl.canMoveBackward" ng-click="$ctrl.moveNoteBackward()" class="btn btn-default" aria-label="">
+            <span class="" aria-hidden="true">-</span>
+          </button>
+          <button type="button" ng-disabled="!$ctrl.canMoveForward" ng-click="$ctrl.moveNoteForward()" class="btn btn-default" aria-label="">
+            <span class="" aria-hidden="true">+</span>
+          </button>
+        </div>
+        <select class="form-control" style="width: auto; display: inline-block" ng-change="$ctrl.updateState()" ng-model="$ctrl.moveValue" ng-options="o as o.label for o in $ctrl.beatChangeAmounts"></select>
+      </div>   
+      <div class="form-group">
+        <label>Delete</label>
+        <button type="button" ng-click="$ctrl.deleteNote()" class="btn btn-default" aria-label="">
+          <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+        </button>
+
+      </div>
+
+    </form>  
+  </div>
+
+</div>

@@ -12,14 +12,37 @@
   <script src="js/app.js"></script>
   <script src="js/controllers.js"></script>
 </head>
-<body ng-controller="TabViewCtrl">
-
+<body ng-controller="TabViewCtrl as ctrl">
+  
+  <!-- Nav bar -->
+  <nav class="navbar navbar-default">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">
+          Tabulater
+        </a>
+      </div>
+      <div class="btn-group navbar-right" uib-dropdown style="margin-right: 10px">
+      <button id="single-button" type="button" class="btn btn-default navbar-btn" uib-dropdown-toggle>
+        <span class="glyphicon glyphicon-menu-hamburger"></span>
+      </button>
+      <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+        <li role="menuitem"><a href="#">Action</a></li>
+        <li role="menuitem"><a href="#">Another action</a></li>
+        <li role="menuitem"><a href="#">Something else here</a></li>
+        <li class="divider"></li>
+        <li role="menuitem"><a href="#">Separated link</a></li>
+      </ul>
+    </div>
+    </div>
+  </nav>
+  
   <div class="container-fluid">
     <div  >
-      <svg ng-repeat="measure in measures" class="measure" ng-attr-id="measure-{{$index}}"
+      <svg ng-repeat="measure in song.measures" class="measure" ng-attr-id="measure-{{$index}}"
            style="display: inline-block" height="200" ng-attr-width="{{measureWidth(measure)}}em">
         <g class="strings">
-          <g ng-repeat="str in strings">
+          <g ng-repeat="str in song.strings">
             <line class="string"
                 x1="0" ng-attr-y1="{{ stringYOffset(str) + 'em' }}"
                 x2="100%" ng-attr-y2="{{ stringYOffset(str) + 'em' }}"
@@ -32,19 +55,27 @@
           </g>
         </g>
         
-        <line class="measure-begin" x1="1" x2="1" ng-attr-y1="{{stringYOffset(1) + 'em'}}"
-                  ng-attr-y2="{{stringYOffset(6) + 'em'}}" />
+        <g>
+          <line class="measure-begin" x1="1" x2="1" ng-attr-y1="{{topStringYOffset() + 'em'}}"
+            ng-attr-y2="{{bottomStringYOffset() + 'em'}}" />
+          
+          <rect 
+                x1="1" ng-attr-y="{{topStringYOffset()}}em"
+                width="8px" ng-attr-height="{{ bottomStringYOffset() - topStringYOffset() + 'em' }}"
+                ng-click="clickMeasure($event, measure)" />
+          
+        </g>
         
         <g class="ruler">
           <line class="string"
-                x1="0" ng-attr-y1="{{ stringYOffset(7) + 'em' }}"
-                x2="100%" ng-attr-y2="{{ stringYOffset(7) + 'em' }}"
+                x1="0" ng-attr-y1="{{ rulerBottom() + 'em' }}"
+                x2="100%" ng-attr-y2="{{ rulerBottom() + 'em' }}"
                 />
 
-          <g ng-repeat="sub in test track by $index" >
+          <g ng-repeat="sub in getRuler(measure) track by $index" >
             <line class="tick" style="stroke: #000000" ng-attr-class="ruler-tick-{{sub}}"
-                  ng-attr-x1="{{ noteXPosition(1 + $index/subdivisions) + 'em'}}" ng-attr-y1="{{ stringYOffset(7) - 0.25*stringOffset - 0.7*stringOffset/sub + 'em' }}"
-                  ng-attr-x2="{{ noteXPosition(1 + $index/subdivisions) + 'em'}}" ng-attr-y2="{{ stringYOffset(7) + 'em' }}"
+                  ng-attr-x1="{{ rulerTickXPosition(measure, $index) + 'em'}}" ng-attr-y1="{{ rulerBottom() - 0.25*stringOffset - 0.7*stringOffset/sub + 'em' }}"
+                  ng-attr-x2="{{ rulerTickXPosition(measure, $index) + 'em'}}" ng-attr-y2="{{ rulerBottom() + 'em' }}"
                   />
           </g>
         </g>
@@ -68,13 +99,13 @@
         <button type="button" class="close pull-right" ng-click="close()" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button> 
-        <div class="form-group">
+          <div class="form-group">
             <label>String</label>
             <select class="form-control" ng-model="note.string" ng-change="setMovedNoteDuration(); updateState();" ng-options="o for o in availableStrings"></select>
           </div>
           <div class="form-group">
             <label>Fret</label>
-            <select class="form-control" ng-model="note.fret" ng-options="o for o in frets"></select>
+            <select class="form-control" ng-model="note.fret" ng-options="o for o in song.frets"></select>
           </div>
           <div class="form-group">
             <label>Beats</label>
@@ -109,10 +140,18 @@
               <button type="button" ng-click="deleteNote()" class="btn btn-default" aria-label="">
                 <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
               </button>
+             
           </div>
+        
     </form>  
     </div>
     
   </div>
+  
+  <note-edit-panel ng-if="ctrl.selectedNote" selected-note="ctrl.selectedNote" close="ctrl.unselectNote()"
+      ></note-edit-panel>
+
+  <measure-edit-panel ng-if="ctrl.selectedMeasure" selected-measure="ctrl.selectedMeasure" close="ctrl.unselectMeasure()"
+      insert-measure="ctrl.insertMeasure(where)" ></measure-edit-panel>
 </body>
 </html>

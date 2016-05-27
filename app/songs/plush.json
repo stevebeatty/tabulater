@@ -1,0 +1,310 @@
+{
+  "subdivisions": 4,
+  "tempo": 80,
+  "noteType": 4,
+  "noteCount": 4,
+  "measures": [
+    {
+      "noteType": 4,
+      "noteCount": 4,
+      "content": [
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 2,
+          "fret": 3
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 2,
+          "fret": 3
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 2,
+          "fret": 2
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 3,
+          "fret": 3
+        }
+      ]
+    },
+    {
+      "noteType": 4,
+      "noteCount": 4,
+      "content": [
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 2,
+          "fret": 1
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 3,
+          "fret": 2
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 2,
+          "fret": 1
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 3,
+          "fret": 2
+        },
+        {
+          "pos": 2.5,
+          "dur": 1.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 2.5,
+          "dur": 1.5,
+          "string": 2,
+          "fret": 0
+        },
+        {
+          "pos": 2.5,
+          "dur": 1.5,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 4,
+          "dur": 0.25,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 4,
+          "dur": 0.25,
+          "string": 2,
+          "fret": 0
+        },
+        {
+          "pos": 4,
+          "dur": 0.25,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 4.25,
+          "dur": 0.25,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 4.25,
+          "dur": 0.25,
+          "string": 2,
+          "fret": 1
+        },
+        {
+          "pos": 4.25,
+          "dur": 0.25,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 4.5,
+          "dur": 0.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 4.5,
+          "dur": 0.5,
+          "string": 2,
+          "fret": 2
+        },
+        {
+          "pos": 4.5,
+          "dur": 0.5,
+          "string": 3,
+          "fret": 0
+        }
+      ]
+    },
+    {
+      "noteType": 4,
+      "noteCount": 4,
+      "content": [
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 2,
+          "fret": 3
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 2,
+          "fret": 3
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 2,
+          "fret": 2
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 3,
+          "fret": 3
+        }
+      ]
+    },
+    {
+      "noteType": 4,
+      "noteCount": 4,
+      "content": [
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 2,
+          "fret": 1
+        },
+        {
+          "pos": 1,
+          "dur": 0.5,
+          "string": 3,
+          "fret": 2
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 2,
+          "fret": 1
+        },
+        {
+          "pos": 1.5,
+          "dur": 1,
+          "string": 3,
+          "fret": 2
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 1,
+          "fret": 3
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 2,
+          "fret": 0
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 3,
+          "fret": 0
+        },
+        {
+          "pos": 2.5,
+          "dur": 2.5,
+          "string": 4,
+          "fret": 0
+        }
+      ]
+    }
+  ],
+  "strings": 6,
+  "frets": 24
+}

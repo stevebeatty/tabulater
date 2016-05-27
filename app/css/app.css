@@ -6,8 +6,8 @@
   src: url(../fonts/FreeSerif.otf);
 }
 
-body {
-  padding-top: 20px;
+nav {
+  margin-bottom: 20px;
 }
 
 .music-notes {
@@ -69,4 +69,52 @@ body {
 
 .form-inline .form-group {
   margin-top: 10px;
+}
+
+.panel > .arrow,
+.panel > .arrow:after {
+  position: absolute;
+  display: block;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+}
+.panel > .arrow {
+  border-width: 11px;
+}
+.panel > .arrow:after {
+  content: "";
+  border-width: 10px;
+}
+.panel.top > .arrow {
+  bottom: -11px;
+  left: 50%;
+  margin-left: -11px;
+  border-top-color: #999;
+  border-top-color: rgba(0, 0, 0, .25);
+  border-bottom-width: 0;
+}
+.panel.top > .arrow:after {
+  bottom: 1px;
+  margin-left: -10px;
+  content: " ";
+  border-top-color: #fff;
+  border-bottom-width: 0;
+}
+
+.panel.bottom > .arrow {
+  top: -11px;
+  left: 50%;
+  margin-left: -11px;
+  border-top-width: 0;
+  border-bottom-color: #999;
+  border-bottom-color: rgba(0, 0, 0, .25);
+}
+.panel.bottom > .arrow:after {
+  top: 1px;
+  margin-left: -10px;
+  content: " ";
+  border-top-width: 0;
+  border-bottom-color: #fff;
 }
