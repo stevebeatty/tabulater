@@ -97,7 +97,8 @@ tabApp.factory('Note', function() {
           continue;
         }
         // once that note is found return the distance
-        return note.pos - n.pos - n.dur ;
+        var dist = note.pos - n.pos - n.dur ;
+        return (dist < 0) ? 0 : dist;
       }
       // no note, so return distance to start of measure
       return note.pos - 1;
@@ -125,7 +126,6 @@ tabApp.factory('Note', function() {
       if (n.pos + n.dur > note.pos) return 0;
     }
     // no note found, so return space left in measure
-    // TODO: change
     return this.getNoteCount() - note.pos + 1;
   };
   
@@ -163,6 +163,18 @@ tabApp.factory('Note', function() {
     return availStrings;
   };
   
+  Measure.prototype.minSubdivision = function() {
+    var minDur = 1/this.song.subdivision;
+    
+    this.content.forEach(function (e) {
+       if (e.dur < minDur) {
+           minDur = e.dur;
+       } 
+    });
+    
+    return Math.round(1/minDur);
+  };
+  
   Measure.prototype.toJSON = function () {
     return {
       noteType: this.noteType,
@@ -180,7 +192,9 @@ tabApp.factory('Note', function() {
     
     if (angular.isObject(obj)) {
       this.subdivisions = obj.subdivisions || 1;
-      this.tempo = obj.tempo;
+      this.tempo = obj.tempo || 120;
+      this.name = obj.name;
+      this.by = obj.by;
       
       if (angular.isNumber(obj.frets)) {
         this.setFrets(obj.frets);
@@ -242,6 +256,8 @@ tabApp.factory('Note', function() {
   
   Song.prototype.toJSON = function () {
     return {
+        name: this.name,
+        by: this.by,
       subdivisions: this.subdivisions,
       tempo: this.tempo,
       noteType: this.noteType,
@@ -282,7 +298,11 @@ tabApp.factory('Note', function() {
     self.mainGain.connect(self.audioContext.destination);
     
     self.measureEndTime = 0;
+    self.measureStartTime = 0;
     self.nextMeasure = -1;
+    
+    self.soundId = 1;
+    self.currentSounds = {};
   };
   
   this.loadSounds = function() {
@@ -325,13 +345,6 @@ tabApp.factory('Note', function() {
     }
   };
   
-  this.playNote = function (string, fret, startTime, stopTime) {
-    var file = self.findSound(string, fret),
-        buffer = self.sounds[file];
-    
-    self.createBufferNode(buffer, fret*100, startTime, stopTime);
-  };
-  
   this.createBufferNode = function (sound, detune, start, stop) {
     var src = self.audioContext.createBufferSource();
     src.buffer = sound;
@@ -344,7 +357,32 @@ tabApp.factory('Note', function() {
     gain.connect(self.mainGain);
     src.start(start);
     src.stop(stop);
+    
+    var soundId = this.soundId;
+    src.onended = function() {
+        console.log('ended id ' + soundId);
+        delete self.currentSounds[soundId];
+        
+        var keys = Object.keys(self.currentSounds);
+        console.log(keys + ' nextmeasure ' + self.nextMeasure);
+        if (keys.length === 0 && self.nextMeasure === -1) {
+            self.onended();
+        }
+    };
+    
+    this.currentSounds[soundId] = src;
+    
+    this.soundId++;
   };
+  
+  this.playNote = function (string, fret, startTime, stopTime) {
+    var file = self.findSound(string, fret),
+        buffer = self.sounds[file];
+    
+    self.createBufferNode(buffer, fret*100, startTime, stopTime);
+  };
+  
+  
   
   this.playMeasureNotes = function(measure, beginTime) {
     var beatDelay = 60/self.song.tempo;
@@ -355,24 +393,42 @@ tabApp.factory('Note', function() {
       self.playNote(note.string, note.fret, start, start + note.dur*beatDelay);
     });
     
+    self.measureStartTime = beginTime;
     self.measureEndTime += beatDelay*measure.getNoteCount();
-    console.log('end time is: ' + self.measureEndTime);
+    console.log('end time is: ' + self.measureEndTime + ' start time is: ' + self.measureStartTime);
   };
   
   this.play = function () {
-    //$scope.playMeasureNotes($scope.measures[0]);
     self.nextMeasure = 0;
-    self.measureEndTime = self.audioContext.currentTime;
+    self.measureStartTime = self.measureEndTime = self.audioContext.currentTime;
     self.playAndSchedule();
   };
   
+  this.isPlaying = function() {
+      return self.nextMeasure > -1 || Object.keys(self.currentSounds).length > 0;
+  };
+  
+  this.onended = function() {
+      console.log('all play as ended');
+  };
+  
+  this.stop = function() {
+      angular.forEach(self.currentSounds, function (value, key) {
+          value.stop();
+      });
+      self.nextMeasure = -1;
+  };
+  
   function timerFunc() {
-      if (self.audioContext.currentTime > 0.8*self.measureEndTime) {
+      if (self.audioContext.currentTime > (self.measureStartTime + 
+              0.8*(self.measureEndTime - self.measureStartTime))) {
         self.playAndSchedule();
       }
       console.log('current time is: ' + self.audioContext.currentTime);
       if(self.nextMeasure > -1 && self.nextMeasure < self.song.measures.length) {
         self.scheduleNextTimeout();
+      } else {
+          self.nextMeasure = -1;
       }
     }
   
@@ -392,8 +448,6 @@ tabApp.factory('Note', function() {
       }
     }
   };
-  
-  
-   
+
 }]);
 

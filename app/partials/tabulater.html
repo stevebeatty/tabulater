@@ -1,0 +1,37 @@
+
+<!-- Nav bar -->
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#">
+                Tabulater
+            </a>
+        </div>
+        <div class="navbar-right" uib-dropdown style="margin-right: 10px">
+            <button type="button" class="btn btn-default navbar-btn" ng-click="tabCtrl.togglePlay()" ng-if="!tabCtrl.editSong">
+                <span class="glyphicon {{tabCtrl.isPlaying ? 'glyphicon-stop' : 'glyphicon-play'}}"></span>
+            </button>
+            <button type="button" class="btn btn-default navbar-btn" ng-click="tabCtrl.toggleEdit()">
+                <span class="glyphicon {{tabCtrl.editSong ? 'glyphicon-music' : 'glyphicon-pencil'}}"></span>
+            </button>
+            <button id="single-button" type="button" class="btn btn-default navbar-btn" uib-dropdown-toggle>
+                <span class="glyphicon glyphicon-menu-hamburger"></span>
+            </button>
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+                <li role="menuitem"><a href="#" ng-click="tabCtrl.openSongPropertiesDialog()">Properties</a></li>
+                <li class="divider"></li>
+                <li role="menuitem"><a href="#" ng-click="tabCtrl.openSaveSongDialog()">Save</a></li>
+                <li role="menuitem"><a href="#" ng-click="tabCtrl.newSong()">New</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<song-display parent="tabCtrl"></song-display>
+
+<note-edit-panel ng-if="tabCtrl.selectedNote" selected-note="tabCtrl.selectedNote" close="tabCtrl.unselectNote()"
+                 ></note-edit-panel>
+
+<measure-edit-panel ng-if="tabCtrl.selectedMeasure" selected-measure="tabCtrl.selectedMeasure" close="tabCtrl.unselectMeasure()"
+                    insert-measure="tabCtrl.insertMeasure(where)" ></measure-edit-panel>
+

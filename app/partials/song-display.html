@@ -1,0 +1,83 @@
+<div class="container-fluid">
+    <h4>{{$ctrl.parent.song.name}}</h4>
+    <h6>{{ ($ctrl.parent.song.by) ? 'by ' + $ctrl.parent.song.by : ''}}</h6>
+    <div class="{{ $ctrl.parent.editSong ? 'editable' : '' }}">
+        <svg ng-repeat="measure in $ctrl.parent.song.measures" class="measure"
+             ng-attr-height="{{$ctrl.measureHeight()}}em" 
+             ng-attr-width="{{$ctrl.measureWidth(measure)}}em">
+        <g class="strings">
+            <g ng-repeat="str in $ctrl.parent.song.strings">
+                <line class="string clickable"
+                      x1="0" ng-attr-y1="{{ $ctrl.stringYOffset(str)}}em"
+                      x2="100%" ng-attr-y2="{{ $ctrl.stringYOffset(str)}}em"
+                      ng-click="$ctrl.clickLine($event, str, measure)"/>
+
+                <rect class="transparent clickable"
+                      x1="0" ng-attr-y="{{ $ctrl.stringClickBoxBottom(str)}}em"
+                      width="100%" ng-attr-height="{{ $ctrl.stringClickBoxHeight()}}em"
+                      ng-click="$ctrl.clickLine($event, str, measure)" />
+            </g>
+        </g>
+
+        <g>
+            <line class="measure-begin" x1="1" x2="1" 
+                  ng-attr-y1="{{$ctrl.topStringYOffset()}}em"
+                  ng-attr-y2="{{$ctrl.bottomStringYOffset()}}em" />
+
+            <rect class="transparent clickable"
+                  x1="1" ng-attr-y="{{$ctrl.topStringYOffset()}}em"
+                  ng-attr-width="{{$ctrl.measureClickBoxWidth()}}em" 
+                  ng-attr-height="{{$ctrl.measureClickBoxHeight()}}em"
+                  ng-click="$ctrl.clickMeasure($event, measure)" />
+        </g>
+
+        <g class="ruler">
+            <line class="string"
+                  x1="0" ng-attr-y1="{{ $ctrl.rulerBottom()}}em"
+                  x2="100%" ng-attr-y2="{{ $ctrl.rulerBottom()}}em"
+                  />
+
+            <g ng-repeat="sub in $ctrl.getRuler(measure) track by $index" >
+                <line ng-attr-class="ruler-tick ruler-tick-{{sub}}"
+                      ng-attr-x1="{{ $ctrl.rulerTickXPosition(measure, $index)}}em" 
+                      ng-attr-y1="{{ $ctrl.rulerTickHeight(sub)}}em"
+                      ng-attr-x2="{{ $ctrl.rulerTickXPosition(measure, $index)}}em" 
+                      ng-attr-y2="{{ $ctrl.rulerBottom()}}em"
+                      />
+            </g>
+        </g>
+
+        <g class="notes">
+            <g ng-repeat="note in measure.content" >
+                <rect ng-attr-class="string-{{note.string}}"
+                      ng-attr-x="{{ $ctrl.noteXPosition(measure, note.pos)}}em" 
+                      ng-attr-y="{{ $ctrl.noteDurationBottom(note.string)}}em"
+                      ng-attr-width="{{ $ctrl.noteDurationDistance(measure, note)}}em" 
+                      ng-attr-height="{{ $ctrl.noteDurationHeight()}}em" />
+
+                <circle class="selected-note" ng-if="note.selected"
+                        ng-attr-cx="{{ $ctrl.noteXPosition(measure, note.pos)}}em"
+                        ng-attr-cy="{{ $ctrl.stringYOffset(note.string)}}em" 
+                        ng-attr-r="{{$ctrl.noteCircleRadius}}em"  />
+
+                <text class="note-text-outline clickable" ng-if="!note.selected"
+                      ng-click="$ctrl.clickNote($event, note, measure)"
+                      ng-attr-x="{{ $ctrl.noteXPosition(measure, note.pos)}}em"
+                      ng-attr-y="{{ $ctrl.stringYOffset(note.string)}}em"
+                      ng-attr-dy="{{ $ctrl.noteTextOffset()}}em" 
+                      text-anchor="middle"
+                      >{{note.fret}}</text>
+
+                <text class="note-text clickable"
+                      ng-click="$ctrl.clickNote($event, note, measure)"
+                      ng-attr-x="{{ $ctrl.noteXPosition(measure, note.pos)}}em"
+                      ng-attr-y="{{ $ctrl.stringYOffset(note.string)}}em"
+                      ng-attr-dy="{{ $ctrl.noteTextOffset()}}em" 
+                      text-anchor="middle"
+                      >{{note.fret}}</text>
+            </g>
+        </g>
+
+        </svg>
+    </div>
+</div>

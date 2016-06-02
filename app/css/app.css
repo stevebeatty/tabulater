@@ -14,17 +14,29 @@ nav {
 
 }
 
-.note-text {
-  font-weight: bold;
+.note-text,
+.note-text-outline {
+    font-weight: bold;
 }
-.measure {
 
+.note-text-outline,
+.editable .note-text-outline.clickable:hover {
+    stroke: white; 
+    stroke-width: 4;
+}
+
+.measure {
+    display: inline-block;
 }
 
 .measure .string,
 .measure .measure-begin {
   stroke: #000000; 
   stroke-width: 0.5;
+}
+
+.ruler-tick {
+    stroke: #000000;
 }
 
 .ruler-tick-1 {
@@ -56,7 +68,7 @@ nav {
 }
 
 .string-5 {
-  fill: #00BAD6; 
+  fill: #D149BD; 
 }
 
 .string-6 {
@@ -117,4 +129,23 @@ nav {
   content: " ";
   border-top-width: 0;
   border-bottom-color: #fff;
+}
+
+
+.editable .clickable {
+    cursor: pointer;
+}
+
+.editable .clickable:hover,
+.editable .transparent.clickable:hover{
+    fill: rgb(108, 211, 245);
+    fill-opacity: .5;
+}
+
+.editable .note-text.clickable:hover {
+    stroke: rgb(108, 211, 245);
+    stroke-opacity: 0.5;
+    stroke-width: 2;
+    fill: #000000;
+    fill-opacity: 1;
 }
