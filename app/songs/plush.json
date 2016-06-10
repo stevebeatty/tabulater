@@ -3,12 +3,10 @@
   "by": "Stone Temple Pilots",
   "subdivisions": 4,
   "tempo": 80,
-  "noteType": 4,
-  "noteCount": 4,
+  "beatType": 4,
+  "beatCount": 4,
   "measures": [
     {
-      "noteType": 4,
-      "noteCount": 4,
       "content": [
         {
           "pos": 1,
@@ -67,8 +65,6 @@
       ]
     },
     {
-      "noteType": 4,
-      "noteCount": 4,
       "content": [
         {
           "pos": 1,
@@ -181,8 +177,6 @@
       ]
     },
     {
-      "noteType": 4,
-      "noteCount": 4,
       "content": [
         {
           "pos": 1,
@@ -241,8 +235,6 @@
       ]
     },
     {
-      "noteType": 4,
-      "noteCount": 4,
       "content": [
         {
           "pos": 1,
@@ -308,5 +300,5 @@
     }
   ],
   "strings": 6,
-  "frets": 24
+  "frets": 12
 }
