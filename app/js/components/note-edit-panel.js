@@ -14,15 +14,15 @@ angular.module('tabApp').directive('noteEditPanel', function () {
         ctrl.moveValue = ctrl.beatChangeAmounts[0];
 
         ctrl.$onInit = function () {
-            console.log('init note edit panel');
         };
 
         ctrl.$onChanges = function (changes) {
-            console.log('changes: ' + JSON.stringify(changes));
+            //console.log('changes: ' + JSON.stringify(changes));
             ctrl.note = ctrl.selectedNote.note;
             ctrl.measure = ctrl.selectedNote.measure;
             ctrl.song = ctrl.selectedNote.song;
             ctrl.fret = ctrl.note.fret;
+            ctrl.string = ctrl.note.string;
 
             ctrl.updateState();
 
@@ -31,6 +31,23 @@ angular.module('tabApp').directive('noteEditPanel', function () {
             }
         };
 
+        ctrl.updateNote = function(field, value) {
+            ctrl.onUpdate({note: ctrl.note, field: field, value: value, measure: ctrl.measure});
+        };
+        
+        ctrl.deleteNote = function() {
+            ctrl.onDelete({note: ctrl.note, measure: ctrl.measure});
+        };
+
+        ctrl.updateFret = function() {
+            ctrl.updateNote('fret', ctrl.fret);
+        };
+        
+        ctrl.updateString = function() {
+            ctrl.updateNote('string', ctrl.string);
+            ctrl.updateState();
+        };
+        
         ctrl.updateState = function () {
             var nextDist = ctrl.measure.findNextNoteDistance(ctrl.note),
                 prevDist = ctrl.measure.findPreviousNoteDistance(ctrl.note);
@@ -51,14 +68,12 @@ angular.module('tabApp').directive('noteEditPanel', function () {
         };
 
         ctrl.increaseBeats = function () {
-            var nextDist = ctrl.measure.findNextNoteDistance(ctrl.note);
-            ctrl.note.dur = Math.min(ctrl.beatChangeValue.value + ctrl.note.dur, nextDist);
+            ctrl.updateNote('dur', ctrl.beatChangeValue.value + ctrl.note.dur);
             ctrl.updateState();
         };
 
         ctrl.decreaseBeats = function () {
-            var minDur = 1 / ctrl.measure.getSubdivisions();
-            ctrl.note.dur = Math.max(ctrl.note.dur - ctrl.beatChangeValue.value, minDur);
+            ctrl.updateNote('dur', ctrl.note.dur - ctrl.beatChangeValue.value);
             ctrl.updateState();
         };
 
@@ -69,30 +84,17 @@ angular.module('tabApp').directive('noteEditPanel', function () {
         };
 
         ctrl.moveNoteForward = function () {
-            var minDur = 1 / ctrl.measure.getSubdivisions(),
-                nextDist = ctrl.measure.findNextNoteDistance(ctrl.note),
-                moveIncr = Math.max(Math.min(ctrl.moveValue.value, nextDist - minDur), 0);
-            ctrl.note.pos += moveIncr;
-            ctrl.setMovedNoteDuration();
+            ctrl.updateNote('pos', ctrl.moveValue.value);
             ctrl.updateState();
         };
 
         ctrl.moveNoteBackward = function () {
-            var moveIncr = ctrl.moveValue.value,
-                prevDist = ctrl.measure.findPreviousNoteDistance(ctrl.note);
-            ctrl.note.pos -= Math.min(moveIncr, prevDist);
+            ctrl.updateNote('pos', -ctrl.moveValue.value);
             ctrl.updateState();
         };
 
-        ctrl.setMovedNoteDuration = function () {
-            var d = ctrl.measure.findNextNoteDistance(ctrl.note);
-            ctrl.note.dur = Math.min(ctrl.note.dur, d);
-            console.log('dist: ' + d);
-        };
-
         ctrl.setBeats = function () {
-            var minDur = 1 / ctrl.measure.getSubdivisions();
-            ctrl.note.dur = Math.max(ctrl.beatChangeValue.value, minDur);
+            ctrl.updateNote('dur', ctrl.beatChangeValue.value);
             ctrl.updateState();
         };
 
@@ -116,7 +118,7 @@ angular.module('tabApp').directive('noteEditPanel', function () {
     }
 
     return {
-        templateUrl: 'partials/note-edit-panel.html',
+        templateUrl: 'partials/components/note-edit-panel.html',
         controller: NoteEditCtrl,
         link: function (scope, element, attrs) {
             scope.$ctrl.element = element;
@@ -125,7 +127,8 @@ angular.module('tabApp').directive('noteEditPanel', function () {
         },
         bindToController: {
             selectedNote: '<',
-            close: '&'
+            close: '&',
+            onUpdate: '&'
         },
         controllerAs: '$ctrl'
     };

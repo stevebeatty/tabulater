@@ -20,8 +20,8 @@
             <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
                 <li role="menuitem"><a href="#" ng-click="tabCtrl.openSongPropertiesDialog()">Properties</a></li>
                 <li class="divider"></li>
-                <li role="menuitem"><a href="#" ng-click="tabCtrl.openSaveSongDialog()">Save</a></li>
                 <li role="menuitem"><a href="#" ng-click="tabCtrl.newSong()">New</a></li>
+                <li role="menuitem"><a href="#" ng-click="tabCtrl.openSaveSongDialog()">Save</a></li>
             </ul>
         </div>
     </div>
@@ -30,8 +30,7 @@
 <song-display parent="tabCtrl"></song-display>
 
 <note-edit-panel ng-if="tabCtrl.selectedNote" selected-note="tabCtrl.selectedNote" close="tabCtrl.unselectNote()"
-                 ></note-edit-panel>
+        on-update="tabCtrl.updateNote(note, field, value, measure)" on-delete="tabCtrl.deleteNote(note, measure)"></note-edit-panel>
 
-<measure-edit-panel ng-if="tabCtrl.selectedMeasure" selected-measure="tabCtrl.selectedMeasure" close="tabCtrl.unselectMeasure()"
-                    insert-measure="tabCtrl.insertMeasure(where)" ></measure-edit-panel>
+<measure-edit-panel ng-if="tabCtrl.selectedMeasure" selected-measure="tabCtrl.selectedMeasure"></measure-edit-panel>
 

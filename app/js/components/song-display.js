@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('tabApp').component('songDisplay', {
-    templateUrl: 'partials/song-display.html',
+    templateUrl: 'partials/components/song-display.html',
     require: {
         parent: '^tabulater'
     },
@@ -10,7 +10,7 @@ angular.module('tabApp').component('songDisplay', {
 
         ctrl.stringsTopOffset = 1;
 
-        ctrl.noteCircleRadius = 0.7;
+        ctrl.noteCircleRadius = 0.6;
         ctrl.stringOffset = ctrl.noteCircleRadius * 2;
 
         ctrl.sideOffset = ctrl.noteCircleRadius * 2;
@@ -113,7 +113,7 @@ angular.module('tabApp').component('songDisplay', {
         };
 
         ctrl.measureWidth = function (measure) {
-            return 1.5 * ctrl.sideOffset + measure.getSubdivisions() * ctrl.subdivisionOffset * measure.getNoteCount();
+            return 1.5 * ctrl.sideOffset + measure.getSubdivisions() * ctrl.subdivisionOffset * measure.getBeatCount();
         };
 
         ctrl.measureClickBoxHeight = function () {
@@ -154,32 +154,32 @@ angular.module('tabApp').component('songDisplay', {
         };
 
         ctrl.rulerTickHeight = function (subdiv) {
-            return ctrl.rulerBottom() - 0.25 * ctrl.stringOffset - 0.7 * ctrl.stringOffset / subdiv;
+            return ctrl.rulerBottom() - 0.15 * ctrl.stringOffset - 0.65 * ctrl.stringOffset / subdiv;
         };
 
         ctrl.rulerBottom = function () {
-            return ctrl.stringYOffset(ctrl.parent.song.strings.length + 1) + 0.4*ctrl.stringOffset;
+            return ctrl.stringYOffset(ctrl.parent.song.strings.length + 1) + 0.2*ctrl.stringOffset;
         };
 
         ctrl.getRuler = function (measure) {
-            return ctrl.findOrCreateRuler(measure.getNoteCount(), measure.getSubdivisions());
+            return ctrl.findOrCreateRuler(measure.getBeatCount(), measure.getSubdivisions());
         };
 
         ctrl.findOrCreateRuler = function (beatCount, subdivision) {
             var index = beatCount + '/' + subdivision;
 
-            if (index in this.rulers) {
-                return this.rulers[index];
+            if (index in ctrl.rulers) {
+                return ctrl.rulers[index];
             } else {
                 var r;
                 if (subdivision === 1) {
                     r = new Array(beatCount).fill(1);
                 } else {
-                    r = ctrl.findOrCreateRuler(beatCount, subdivision / 2);
+                    r = ctrl.findOrCreateRuler(beatCount, subdivision / 2).slice();
                     ctrl.insertBetween(r, subdivision);
                 }
 
-                this.rulers[index] = r;
+                ctrl.rulers[index] = r;
                 return r;
             }
         };
@@ -199,7 +199,7 @@ angular.module('tabApp').component('songDisplay', {
                 ti = Math.floor(frac / f),
                 fr = frac === 0 ? 0 : Math.round((frac % f) / f),
                 rnd = Math.floor(pos) + ti * f + fr * f,
-                clm = Math.min(measure.getNoteCount() + 1 - f, rnd);
+                clm = Math.min(measure.getBeatCount() + 1 - f, rnd);
 
             console.log('pos ' + pos + ' ' + frac + ' ' + ti + ' ' + fr + ' r ' + clm);
 

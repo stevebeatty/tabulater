@@ -15,6 +15,18 @@
           <span class="" aria-hidden="true">After</span>
         </button>
       </div>
+      <div class="form-group">
+        <label>Delete</label>
+        <button type="button" ng-click="$ctrl.deleteMeasure()" class="btn btn-default" aria-label="">
+          <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="form-group">
+        <label>Min Beat</label>
+        <select class="form-control" ng-model="$ctrl.subdivision" 
+                ng-change="$ctrl.setMeasureSubdivisions()"
+                ng-options="o as o.label for o in $ctrl.availableSubdivisions"></select>
+      </div>
     </form>
   </div>
 </div>

@@ -36,38 +36,38 @@ nav {
 }
 
 .ruler-tick {
-    stroke: #000000;
+    stroke: #BABABA;
 }
 
 .ruler-tick-1 {
-  stroke-width: 2;
+  stroke-width: 1.5;
 }
 
 .ruler-tick-2 {
-  stroke-width: 1.5;
+  stroke-width: 1.25;
 }
 
 .transparent {
   fill-opacity: 0;
 }
-.string-1 {
+.string-3 {
   /* stroke: #008A00; */
   fill: #008A00; 
 }
 
-.string-2 {
+.string-1 {
   fill: #FF0000; 
  }
 
-.string-3 {
+.string-2 {
   fill: #0000FF; 
 }
 
-.string-4 {
+.string-5 {
   fill: #F78C00; 
 }
 
-.string-5 {
+.string-4 {
   fill: #D149BD; 
 }
 
@@ -75,8 +75,13 @@ nav {
   fill: #7300FF;
 }
 
-.selected-note {
+.selected-note,
+.selected-measure {
   fill: #70FFB5;
+}
+
+.selected-measure {
+    fill-opacity: 0.5;
 }
 
 .form-inline .form-group {

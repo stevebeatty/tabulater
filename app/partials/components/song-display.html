@@ -24,7 +24,7 @@
                   ng-attr-y1="{{$ctrl.topStringYOffset()}}em"
                   ng-attr-y2="{{$ctrl.bottomStringYOffset()}}em" />
 
-            <rect class="transparent clickable"
+            <rect ng-class="{transparent: true, clickable: true, 'selected-measure': measure.selected}"
                   x1="1" ng-attr-y="{{$ctrl.topStringYOffset()}}em"
                   ng-attr-width="{{$ctrl.measureClickBoxWidth()}}em" 
                   ng-attr-height="{{$ctrl.measureClickBoxHeight()}}em"
