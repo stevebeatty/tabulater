@@ -76,6 +76,15 @@
                       text-anchor="middle"
                       >{{note.fret}}</text>
             </g>
+            
+            <g ng-repeat="cn in measure.continuedNotes"  >
+                <rect ng-init="note = cn.note"
+                        ng-attr-class="string-{{note.string}}"
+                      ng-attr-x="{{ $ctrl.noteXPosition(measure, note.pos)}}em" 
+                      ng-attr-y="{{ $ctrl.noteDurationBottom(note.string)}}em"
+                      ng-attr-width="{{ $ctrl.noteDurationDistance(measure, note)}}em" 
+                      ng-attr-height="{{ $ctrl.noteDurationHeight()}}em" />
+            </g>
         </g>
 
         </svg>

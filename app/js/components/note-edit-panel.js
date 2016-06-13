@@ -49,8 +49,8 @@ angular.module('tabApp').directive('noteEditPanel', function () {
         };
         
         ctrl.updateState = function () {
-            var nextDist = ctrl.measure.findNextNoteDistance(ctrl.note),
-                prevDist = ctrl.measure.findPreviousNoteDistance(ctrl.note);
+            var nextDist = ctrl.note.measure.findNextNoteDistance(ctrl.note),
+                prevDist = ctrl.note.measure.findPreviousNoteDistance(ctrl.note);
 
             console.log('next dist ' + nextDist + ' prevDist ' + prevDist);
 
@@ -78,7 +78,7 @@ angular.module('tabApp').directive('noteEditPanel', function () {
         };
 
         ctrl.updateBeatOptions = function (nextDist) {
-            var minDur = 1 / ctrl.measure.getSubdivisions();
+            var minDur = 1 / ctrl.note.measure.getSubdivisions();
             ctrl.canDecreaseBeats = (ctrl.note.dur - minDur) > 0;
             ctrl.canIncreaseBeats = (nextDist - ctrl.note.dur) > 0;
         };
@@ -99,7 +99,7 @@ angular.module('tabApp').directive('noteEditPanel', function () {
         };
 
         ctrl.deleteNote = function () {
-            ctrl.measure.deleteNote(ctrl.note);
+            ctrl.note.measure.deleteNote(ctrl.note);
             ctrl.close();
         };
 

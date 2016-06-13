@@ -124,17 +124,36 @@ angular.module('tabApp').component('songDisplay', {
             return 0.6;
         };
 
+        /**
+         * Finds the X position on a string in a measure for a given 
+         * note position
+         * @param {type} measure
+         * @param {type} pos
+         * @returns {Number|ctrl.noteCircleRadius}
+         */
         ctrl.noteXPosition = function (measure, pos) {
             return ctrl.sideOffset + ctrl.notePositionDistance(measure, pos, 1);
         };
 
         ctrl.notePositionDistance = function (measure, pos1, pos2) {
-            return Math.abs(pos2 - pos1) * ctrl.subdivisionOffset * measure.getSubdivisions();
+            var maxPos = measure.getBeatCount(),
+                    posDiff = Math.abs(pos2 - pos1),
+                    result = posDiff * ctrl.subdivisionOffset * measure.getSubdivisions();
+            
+                if (posDiff > maxPos) {
+                    console.log("max pos < result : " + maxPos + " < " + result);
+                }
+            return result;
         };
 
         ctrl.noteDurationDistance = function (measure, note) {
             var dur = note.dur || 1;
-            return ctrl.notePositionDistance(measure, dur, 0);
+            var maxDur = measure.getBeatCount() - note.pos + 1;
+            if (dur > maxDur) {
+                    console.log("max maxDur < dur : " + maxDur + " < " + dur);
+                }
+            var re = ctrl.notePositionDistance(measure, Math.min(dur, maxDur), 0);
+            return re;
         };
 
         ctrl.noteDurationBottom = function (string) {

@@ -36,21 +36,25 @@ angular.module('tabApp')
             });
         };
 
+        Measure.prototype.addNote = function (note) {
+            return this._pushNote(note);
+        };
+
         Measure.prototype.addNoteFromObject = function (note) {
-            var n = new Note(note);
-            this.content.push(n);
+            return this._pushNote(new Note(note));
+        };
+
+        Measure.prototype._pushNote = function(note) {
+            this.content.push(note);
             this.sortMeasure();
-            
-           // console.log('note bounds: ' + this.getNoteBounds(note));
-            
-            return n;
+            this.onNoteMoved(note); 
+            note.measure = this;
+            return note;
         };
 
         Measure.prototype.addNotesFromList = function(list) {
             for (var i = 0; i < list.length; i++) {
-                var n = new Note(list[i]);
-                this.content.push(n);
-                this.checkNoteBounds(n);
+                this._pushNote(new Note(list[i]));
             }
             
             this.sortMeasure();
@@ -61,7 +65,7 @@ angular.module('tabApp')
             var extra = (note.pos + note.dur - 1) - this.getBeatCount();
             var _arr = [];
             if (extra > 0) {
-                console.log('note outside measure, extra: ' + extra + ', dur: ' + note.dur + ' m:' + this.nextMeasure);
+                //console.log('note outside measure, extra: ' + extra + ', dur: ' + note.dur + ' m:' + this.nextMeasure);
                 
                 if (this.nextMeasure) {
                     var n = new Note(note);
@@ -91,7 +95,7 @@ angular.module('tabApp')
         Measure.prototype._getNoteDurFromStart = function(note, _arr) {
             // for each measure the note spans
             var extra = note.dur - this.getBeatCount();
-                console.log('*note x measure, extra: ' + extra + ', dur: ' + note.dur + ' m:' + this.nextMeasure);
+                //console.log('*note x measure, extra: ' + extra + ', dur: ' + note.dur + ' m:' + this.nextMeasure);
             if (extra > 0) {
                 if (this.nextMeasure) {
                     note.dur = extra;
@@ -132,8 +136,10 @@ angular.module('tabApp')
         Measure.prototype.deleteNote = function (note) {
             var idx = this.content.indexOf(note);
             if (idx >= 0) {
+                this.onNoteMoving(note);
                 this.content.splice(idx, 1);
                 this.sortMeasure();
+                delete note.measure;
             }
         };
         
@@ -156,8 +162,6 @@ angular.module('tabApp')
             var d = this.findNextNoteDistance(note);
             note.dur = Math.min(note.dur, d);
             
-            this.onNoteMoved(note);
-            
             console.log('dist: ' + d);
         };
         
@@ -170,7 +174,7 @@ angular.module('tabApp')
                 var measure = bounds[i].measure;
                 measure._deleteContinuedNote(note);
             }
-            console.log('note bounds: ' + JSON.stringify(this._getNoteDuration(bounds)));
+            console.log('note bounds pre: ' + JSON.stringify(this._getNoteDuration(bounds)));
         };
         
         Measure.prototype._getNoteDuration = function(bounds) {
@@ -183,19 +187,26 @@ angular.module('tabApp')
         
         Measure.prototype.onNoteMoved = function (note) {
             var bounds = this.getNoteBounds(note);  
-            // for the 2nd and up measure, remove the reference
+            // for the 2nd and up measure, add the reference
             for (var i = 1; i < bounds.length; i++) {
-                var measure = bounds[i].measure;
-                measure._addContinuedNote(note);
+                var measure = bounds[i].measure,
+                        dur = bounds[i].dur,
+                        nn = new Note(note);
+                nn.dur = dur;
+                nn.pos = 1;
+                measure._addContinuedNote(note, nn);
             }
-            console.log('note bounds: ' + this._getNoteDuration(bounds));
+            console.log('note bounds post: ' + this._getNoteDuration(bounds));
         };
 
         Measure.prototype.setNoteDuration = function(note, duration) {
             var nextDist = this.findNextNoteDistance(note),
                 minDur = 1 / this.getSubdivisions();
+                
+                this.onNoteMoving(note);
             note.dur = Math.max(Math.min(duration, nextDist), minDur);
-            console.log('note bounds: ' + this.getNoteBounds(note));
+            this.onNoteMoved(note);
+            console.log('note bounds: ' + this._getNoteDuration(this.getNoteBounds(note)));
         };
 
         Measure.prototype.moveNotePosition = function (note, amount) {
@@ -210,8 +221,25 @@ angular.module('tabApp')
             }
             
             this.onNoteMoving(note);
-            note.pos += moveIncr;
-            this.onNoteMoved(note);
+            
+            // if moving out of measure delete and add to next
+            var dest = note.pos + moveIncr;
+            if (dest - 1 >= this.getBeatCount()) {
+                if (this.nextMeasure) {
+                    this.deleteNote(note);
+                    note.pos = dest - this.getBeatCount();
+                    this.nextMeasure.addNote(note);
+                }
+            } else if (dest < 1) {
+                if (this.prevMeasure) {
+                    this.deleteNote(note);
+                    note.pos = this.getBeatCount() + dest;
+                    this.prevMeasure.addNote(note);
+                }
+            } else {
+                note.pos += moveIncr;
+                this.onNoteMoved(note);
+            }
         };
 
         Measure.prototype.getSubdivisions = function () {
@@ -256,8 +284,16 @@ angular.module('tabApp')
                 var dist = note.pos - n.pos - n.dur;
                 return (dist < 0) ? 0 : dist;
             }
-            // no note, so return distance to start of measure
-            return note.pos - 1;
+
+            var outsideMeasureDist = 0;
+            if (this.prevMeasure) {
+                var n = new Note(note);
+                n.pos = this.prevMeasure.getBeatCount() + 1;
+                outsideMeasureDist = this.prevMeasure.findPreviousNoteDistance(n);
+                
+            }
+            console.log('has prev measure dist: ' + outsideMeasureDist + ' pos ' + note.pos);
+            return outsideMeasureDist + note.pos - 1;
         };
 
         /**

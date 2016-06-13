@@ -1,9 +1,9 @@
 {
   "version": "0.0.0",
   "private": true,
-  "name": "angular-tab",
+  "name": "tabulater",
   "description": "Angular based tablature viewer",
-  "repository": "https://github.com/angular/angular-phonecat",
+  "repository": "https://github.com/stevebeatty/tabulater",
   "license": "MIT",
   "devDependencies": {
     "karma": "^0.12.16",
@@ -20,7 +20,7 @@
     "postinstall": "bower install",
 
     "prestart": "npm install",
-    "start": "http-server -a 0.0.0.0 -p 8000",
+    "start": "http-server -a 0.0.0.0 -p 8008",
 
     "pretest": "npm install",
     "test": "node node_modules/karma/bin/karma start test/karma.conf.js",

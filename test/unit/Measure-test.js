@@ -123,4 +123,73 @@ describe('Measure', function() {
             expect(m.minSubdivision()).toBe(4);
         });
     });
+    
+    describe('moveNotePosition', function() {
+
+        it('should move between measures', function() {
+            var measures = [new Measure({
+                beatType: 4,
+                beatCount: 4,
+                subdivisions: 4,
+                content: [
+                    {"pos": 1.25, "dur": 0.5, "string": 1, "fret": 0}
+                ]
+            }),new Measure({
+                beatType: 4,
+                beatCount: 4,
+                subdivisions: 4,
+                content: [
+                ]
+            })];
+        
+            measures[0].nextMeasure = measures[1];
+            measures[1].prevMeasure = measures[0];
+            
+            measures[0].moveNotePosition(measures[0].content[0], 5);
+            
+            expect(measures[0].content.length).toBe(0);
+            expect(measures[1].content.length).toBe(1);
+            expect(measures[1].content[0].pos).toBe(2.25);
+            expect(measures[1].content[0].dur).toBe(0.5);
+        });
+        
+        it('should set continued notes', function() {
+            var measures = [new Measure({
+                beatType: 4,
+                beatCount: 4,
+                subdivisions: 4,
+                content: []
+            }),new Measure({
+                beatType: 4,
+                beatCount: 4,
+                subdivisions: 4,
+                content: []
+            })];
+        
+            measures[0].nextMeasure = measures[1];
+            measures[1].prevMeasure = measures[0];
+            
+            expect(measures[0].continuedNotes.length).toBe(0);
+            expect(measures[1].continuedNotes.length).toBe(0);
+            
+            measures[0].addNoteFromObject({"pos": 4.25, "dur": 1.0, "string": 1, "fret": 0});
+
+            expect(measures[0].continuedNotes.length).toBe(0);
+            expect(measures[1].continuedNotes.length).toBe(1);
+            expect(measures[1].continuedNotes[0].note.pos).toBe(1);
+            expect(measures[1].continuedNotes[0].note.dur).toBe(0.25);
+            expect(measures[1].continuedNotes[0].note.string).toBe(1);
+            expect(measures[1].continuedNotes[0].note.fret).toBe(0);
+            expect(measures[1].continuedNotes[0].origin).toBe(measures[0].content[0]);
+            
+            measures[0].moveNotePosition(measures[0].content[0], 2);
+            
+            expect(measures[0].continuedNotes.length).toBe(0);
+            expect(measures[1].continuedNotes.length).toBe(0);
+            expect(measures[1].content[0].pos).toBe(2.25);
+            expect(measures[1].content[0].dur).toBe(1.0);
+            expect(measures[1].content[0].string).toBe(1);
+            expect(measures[1].content[0].fret).toBe(0);
+        });
+    });
 });
