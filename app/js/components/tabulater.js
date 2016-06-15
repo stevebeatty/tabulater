@@ -11,13 +11,15 @@ angular.module('tabApp').component('tabulater', {
             soundService.initialize();
             soundService.loadSounds();
             soundService.loadSong('songs/plush.json').then(function () {
-                ctrl.song = $scope.song = soundService.song;
+                ctrl.song = soundService.song;
             });
 
             ctrl.selectedMeasure = null;
             ctrl.selectedNote = null;
 
             ctrl.editSong = false;
+            
+            ctrl.lastNoteDuration = 1;
 
             ctrl.selectMeasure = function (measure, posEl) {
                 ctrl.unselectMeasure();
@@ -74,7 +76,8 @@ angular.module('tabApp').component('tabulater', {
                 }
             };
             
-            ctrl.updateNote = function(note, field, value, measure) {
+            ctrl.updateNote = function(note, field, value) {
+                var measure = note.measure;
                 console.log('update note: ' + note + ' field ' + field + ' value ' + value);
                 
                 switch (field) {
@@ -83,6 +86,7 @@ angular.module('tabApp').component('tabulater', {
                         break;
                     case 'dur':
                         measure.setNoteDuration(note, value);
+                        ctrl.lastNoteDuration = note.dur;
                         break;
                     case 'pos':
                         measure.moveNotePosition(note, value);
@@ -93,8 +97,8 @@ angular.module('tabApp').component('tabulater', {
                 }
             };
             
-            ctrl.deleteNote = function(note, measure) {
-                measure.deleteNote(note);
+            ctrl.deleteNote = function(note) {
+                note.measure.deleteNote(note);
             };
 
             ctrl.play = function () {
@@ -186,6 +190,25 @@ angular.module('tabApp').component('tabulater', {
 
                         ctrl.openSongPropertiesDialog();
                     });
+            };
+            
+            ctrl.openLoadSongDialog = function () {
+                
+                var callback = function(json) {
+                    console.log('callback');
+                    soundService.loadSongJson(json);
+                    ctrl.song = soundService.song;
+                };
+                
+                $uibModal.open({
+                    templateUrl: 'partials/dialogs/load-dialog.html',
+                    controller: 'LoadSongCtrl',
+                    controllerAs: 'ctrl',
+                    size: 'lg',
+                    resolve: {
+                        callback: function() { return callback; }
+                    }
+                });
             };
 
         }]});

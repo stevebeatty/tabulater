@@ -62,8 +62,12 @@ angular.module('tabApp')
             this.loadSong = function (songPath) {
                 return $http.get(songPath, {responseType: 'json'}).then(function (response) {
                     console.log('retrieved song ' + songPath);
-                    self.song = new Song(angular.fromJson(response.data));
+                    self.loadSongJson(response.data);
                 });
+            };
+            
+            this.loadSongJson = function (songJson) {
+                self.song = new Song(songJson);
             };
 
             this.findSound = function (string, fret) {

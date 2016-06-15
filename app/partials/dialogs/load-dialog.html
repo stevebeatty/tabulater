@@ -1,0 +1,13 @@
+<div class="modal-header">
+    <h3 class="modal-title">Load Song</h3>
+</div>
+<div class="modal-body">
+    <p>Choose file to upload</p>
+    <form>
+        <input type="file" id="load-file" name="file" file-reader="ctrl.loadFile" />
+    </form>
+    <h4 class="text-danger">{{ ctrl.error }}</h4>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-warning" type="button" ng-click="ctrl.cancel()">Cancel</button>
+</div>

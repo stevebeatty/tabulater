@@ -19,11 +19,8 @@ angular.module('tabApp')
             this.setSubdivisions(obj.subdivisions);
 
             if (angular.isArray(obj.content)) {
-                for (var i = 0; i < obj.content.length; i++) {
-                    this.content.push(new Note(obj.content[i]));
-                }
+                this.addNotesFromList(obj.content);
             }
-            this.sortMeasure();
         };
 
         Measure.prototype.sortMeasure = function () {
@@ -53,11 +50,22 @@ angular.module('tabApp')
         };
 
         Measure.prototype.addNotesFromList = function(list) {
+            var notes = [];
+            // add notes
             for (var i = 0; i < list.length; i++) {
-                this._pushNote(new Note(list[i]));
+                var n = new Note(list[i]);
+                n.measure = this;
+                notes.push(n);
+                this.content.push(n);
             }
             
+            // sort them
             this.sortMeasure();
+            
+            // do bounds checking
+            for (var i = 0; i < notes.length; i++) {
+                this.onNoteMoved(notes[i]); 
+            }
         };
         
         Measure.prototype.getNoteBounds = function(note) {
@@ -196,7 +204,7 @@ angular.module('tabApp')
                 nn.pos = 1;
                 measure._addContinuedNote(note, nn);
             }
-            console.log('note bounds post: ' + this._getNoteDuration(bounds));
+            //console.log('note bounds post: ' + this._getNoteDuration(bounds));
         };
 
         Measure.prototype.setNoteDuration = function(note, duration) {
@@ -206,7 +214,7 @@ angular.module('tabApp')
                 this.onNoteMoving(note);
             note.dur = Math.max(Math.min(duration, nextDist), minDur);
             this.onNoteMoved(note);
-            console.log('note bounds: ' + this._getNoteDuration(this.getNoteBounds(note)));
+            //console.log('note bounds: ' + this._getNoteDuration(this.getNoteBounds(note)));
         };
 
         Measure.prototype.moveNotePosition = function (note, amount) {

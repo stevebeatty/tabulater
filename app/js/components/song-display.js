@@ -45,14 +45,14 @@ angular.module('tabApp').component('songDisplay', {
                 w = x / bound.width,
                 pos = ctrl.closestNotePosition(measure, w),
                 note = {pos: pos, string: string, fret: 0},
-            dur = measure.findNextNoteDistance(note);
+                dur = measure.findNextNoteDistance(note);
 
             if (dur === 0) {
                 console.log('cannot place new note - currently occupied');
                 return;
             }
 
-            note.dur = Math.min(dur, 1);
+            note.dur = Math.min(dur, ctrl.parent.lastNoteDuration);
 
             var rulerEl = ctrl.closestRuler(event.target),
                 n = measure.addNoteFromObject(note),

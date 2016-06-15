@@ -11,4 +11,5 @@ angular.module('tabApp').controller('SaveSongCtrl', ['$uibModalInstance',
     ctrl.ok = function () {
         $uibModalInstance.dismiss('ok');
     };
+    
 }]);
