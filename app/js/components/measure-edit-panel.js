@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('tabApp').directive('measureEditPanel', function () {
+angular.module('tabApp').directive('measureEditPanel', ['$timeout', function ($timeout) {
   function MeasureCtrl() {
       var ctrl = this;
 
@@ -29,7 +29,7 @@ angular.module('tabApp').directive('measureEditPanel', function () {
         var ch = $(ctrl.element.children()[0]),
           el = ctrl.selectedMeasure.element,
           height = el[0].getBBox().height;
-
+          console.log(el[0]);
         ch.position({
           my: 'left top',
           at: 'left bottom+' + (height),
@@ -54,12 +54,38 @@ angular.module('tabApp').directive('measureEditPanel', function () {
           ctrl.measure.setSubdivisions(ctrl.subdivision.value);
       };
 
+      ctrl.updatePos = function() {
+          $timeout(function() {
+              ctrl.position();
+          }, 0, false);
+      };
+
       ctrl.insertAfter = function() {
-        ctrl.tabulater.insertMeasure({where: 'after'});
+        ctrl.tabulater.insertMeasure('after');
+        ctrl.updatePos();
       };
 
       ctrl.insertBefore = function() {
-        ctrl.tabulater.insertMeasure({where: 'before'});
+        ctrl.tabulater.insertMeasure('before');
+        ctrl.updatePos();
+      };
+      
+      ctrl.pasteAfter = function() {
+        ctrl.tabulater.pasteMeasure('after');
+        ctrl.updatePos();
+      };
+
+      ctrl.pasteBefore = function() {
+        ctrl.tabulater.pasteMeasure('before');
+        ctrl.updatePos();
+      };
+      
+      ctrl.hasReference = function() {
+          ctrl.tabulater.referenceMeasure !== null;
+      };
+      
+      ctrl.copyMeasure = function() {
+          ctrl.tabulater.setReferenceMeasure(ctrl.measure);
       };
       
       ctrl.deleteMeasure = function() {
@@ -90,5 +116,5 @@ angular.module('tabApp').directive('measureEditPanel', function () {
     controllerAs: '$ctrl'
   };
   
-});
+}]);
 

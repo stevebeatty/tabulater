@@ -154,3 +154,7 @@ nav {
     fill: #000000;
     fill-opacity: 1;
 }
+
+.btn.disabled, .btn[disabled] {
+    background-color: #cccccc;
+};

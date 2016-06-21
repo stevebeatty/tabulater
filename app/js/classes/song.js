@@ -58,7 +58,6 @@ angular.module('tabApp')
         Song.prototype.insertMeasureBefore = function (measure, toInsert) {
             console.log('inserting');
             var idx = this.measures.indexOf(measure);
-            idx = idx < 0 ? 0 : idx;
             this.measures.splice(idx, 0, toInsert);
             this.setMeasureSong(toInsert);
             this.linkMeasures(idx);

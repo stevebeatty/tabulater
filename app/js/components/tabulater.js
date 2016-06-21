@@ -16,6 +16,7 @@ angular.module('tabApp').component('tabulater', {
 
             ctrl.selectedMeasure = null;
             ctrl.selectedNote = null;
+            ctrl.referenceMeasure = null;
 
             ctrl.editSong = false;
             
@@ -37,14 +38,26 @@ angular.module('tabApp').component('tabulater', {
                 }
             };
 
+            ctrl.setReferenceMeasure = function(measure) {
+                ctrl.referenceMeasure = measure;
+            };
+
             ctrl.insertMeasure = function (where) {
                 if (where === 'before') {
                     soundService.song.insertMeasureBefore(ctrl.selectedMeasure.measure, new Measure());
                 } else {
                     soundService.song.insertMeasureAfter(ctrl.selectedMeasure.measure, new Measure());
                 }
-
-                ctrl.unselectMeasure();
+            };
+            
+            ctrl.pasteMeasure = function (where) {
+                if (where === 'before') {
+                    soundService.song.insertMeasureBefore(ctrl.selectedMeasure.measure, 
+                    new Measure(ctrl.referenceMeasure, soundService.song));
+                } else {
+                    soundService.song.insertMeasureAfter(ctrl.selectedMeasure.measure, 
+                    new Measure(ctrl.referenceMeasure, soundService.song));
+                }
             };
 
             ctrl.deleteSelectedMeasure = function () {
@@ -130,6 +143,7 @@ angular.module('tabApp').component('tabulater', {
                 } else {
                     ctrl.unselectMeasure();
                     ctrl.unselectNote();
+                    ctrl.setReferenceMeasure(null);
                 }
                 ctrl.editSong = !ctrl.editSong;
             };
