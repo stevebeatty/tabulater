@@ -61,7 +61,7 @@
                         ng-attr-r="{{$ctrl.noteCircleRadius}}em"  />
 
                 <text class="note-text-outline clickable" ng-if="!note.selected"
-                      ng-click="$ctrl.clickNote($event, note, measure)"
+                      ng-click="$ctrl.clickNote($event, note)"
                       ng-attr-x="{{ $ctrl.noteXPosition(measure, note.pos)}}em"
                       ng-attr-y="{{ $ctrl.stringYOffset(note.string)}}em"
                       ng-attr-dy="{{ $ctrl.noteTextOffset()}}em" 
@@ -69,7 +69,7 @@
                       >{{note.fret}}</text>
 
                 <text class="note-text clickable"
-                      ng-click="$ctrl.clickNote($event, note, measure)"
+                      ng-click="$ctrl.clickNote($event, note)"
                       ng-attr-x="{{ $ctrl.noteXPosition(measure, note.pos)}}em"
                       ng-attr-y="{{ $ctrl.stringYOffset(note.string)}}em"
                       ng-attr-dy="{{ $ctrl.noteTextOffset()}}em" 

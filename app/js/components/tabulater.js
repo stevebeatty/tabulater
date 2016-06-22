@@ -16,6 +16,7 @@ angular.module('tabApp').component('tabulater', {
 
             ctrl.selectedMeasure = null;
             ctrl.selectedNote = null;
+            ctrl.selectedNotes = [];
             ctrl.referenceMeasure = null;
 
             ctrl.editSong = false;
@@ -72,24 +73,68 @@ angular.module('tabApp').component('tabulater', {
                     });
             };
 
-            ctrl.selectNote = function (note, measure, position) {
+            ctrl.selectNote = function (note, position) {
                 ctrl.unselectMeasure();
                 ctrl.unselectNote();
-
-                ctrl.selectedNote = {note: note, measure: measure, song: soundService.song,
-                    position: position};
+                
+                ctrl.selectedNote = ctrl._setNoteSelection(note, position);
                 console.log('selected note: ' + JSON.stringify(note));
+                
+                ctrl.selectedNotes.push(ctrl.selectedNote);
+            };
+            
+            ctrl.toggleNoteSelection = function(note, pos) {
+                var selPos = ctrl.selectedNotes.findIndex(function(el){
+                    if(el.note === note) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+                
+                if (selPos >= 0) { // already selected
+                    var removed = ctrl.selectedNotes.splice(selPos, 1);
+                    removed.forEach(function(sel) {
+                        ctrl._unsetNoteSelection(sel);
+                    });
+                } else {
+                    ctrl.selectedNotes.push(ctrl._setNoteSelection(note, pos));
+                }
+            };
+            
+            ctrl._setNoteSelection = function(note, pos) {
+                var sel = {note: note, position: pos};
                 note.selected = true;
+                return sel;
+            };
+            
+            ctrl.unselectAllNotes = function() {
+                ctrl.selectedNotes.forEach(function(sel){
+                    ctrl._unsetNoteSelection(sel);
+                });
+                
+                ctrl.selectedNotes.length = 0;
+            };
+            
+            ctrl._unsetNoteSelection = function(noteSel) {
+                noteSel.note.selected = false;
             };
 
             ctrl.unselectNote = function () {
                 if (ctrl.selectedNote) {
-                    ctrl.selectedNote.note.selected = false;
+                    ctrl._unsetNoteSelection(ctrl.selectedNote);
                     ctrl.selectedNote = null;
                 }
+                
+                ctrl.unselectAllNotes();
             };
             
             ctrl.updateNote = function(note, field, value) {
+                // check for multiple update
+                if (angular.isArray(note) && note.length > 1) {
+                    return ctrl.updateNotes(note, field, value);
+                }
+                
                 var measure = note.measure;
                 console.log('update note: ' + note + ' field ' + field + ' value ' + value);
                 
@@ -108,6 +153,17 @@ angular.module('tabApp').component('tabulater', {
                         note.fret = value;
                         break;
                 }
+            };
+            
+            ctrl.updateNotes = function(notes, field, value) {
+                notes.forEach(function(n) {
+                    switch (field) {
+                        case 'fret':
+                            n.fret = Math.max(n.fret + value, 0);
+                            break;
+                    }
+                });
+                
             };
             
             ctrl.deleteNote = function(note) {

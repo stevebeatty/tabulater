@@ -61,7 +61,7 @@ angular.module('tabApp').component('songDisplay', {
                 position = {x: center,
                     y: rulerEl.getBoundingClientRect().bottom};
 
-            ctrl.parent.selectNote(n, measure, position);
+            ctrl.parent.selectNote(n, position);
         };
 
         ctrl.clickMeasure = function (event, measure) {
@@ -75,7 +75,8 @@ angular.module('tabApp').component('songDisplay', {
             ctrl.parent.selectMeasure(measure, rulerEl);
         };
 
-        ctrl.clickNote = function (event, note, measure) {
+        ctrl.clickNote = function (event, note) {
+            console.log(event);
             if (!ctrl.parent.editSong)
                 return;
 
@@ -85,7 +86,11 @@ angular.module('tabApp').component('songDisplay', {
                 pos = {x: (bound.left + bound.width / 2),
                     y: rulerEl.getBoundingClientRect().bottom};
 
-            ctrl.parent.selectNote(note, measure, pos);
+            if (event.ctrlKey) {
+                ctrl.parent.toggleNoteSelection(note, pos);
+            } else {
+                ctrl.parent.selectNote(note, pos);
+            }            
         };
 
         ctrl.stringYOffset = function (stringNum) {
