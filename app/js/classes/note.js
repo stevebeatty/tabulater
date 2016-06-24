@@ -19,6 +19,10 @@ angular.module('tabApp').factory('Note', function () {
             fret: this.fret
         };
     };
+    
+    Note.prototype.toString = function () {
+        return JSON.stringify(this);
+    };
 
     return Note;
 

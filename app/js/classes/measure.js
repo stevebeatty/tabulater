@@ -13,24 +13,26 @@ angular.module('tabApp')
         }
 
         Measure.prototype.setPropertiesFromObject = function(obj) {
-            this.beatType = obj.beatType;
-            this.beatCount = obj.beatCount;
-            
             this.setSubdivisions(obj.subdivisions);
-
+            this.setBeatCount(obj.beatCount);
+            this.setBeatType(obj.beatType);
+            this.setRuler();
+            
             if (angular.isArray(obj.content)) {
                 this.addNotesFromList(obj.content);
             }
         };
 
-        Measure.prototype.sortMeasure = function () {
-            this.content.sort(function (a, b) {
-                var d = a.pos - b.pos;
-                if (d !== 0)
-                    return d;
+        Measure.prototype.sortFnPosThenStringAsc = function(a, b) {
+            var d = a.pos - b.pos;
+            if (d !== 0)
+                return d;
 
-                return a.string - b.string;
-            });
+            return a.string - b.string;
+        };
+
+        Measure.prototype.sortMeasure = function () {
+            this.content.sort(Measure.prototype.sortFnPosThenStringAsc);
         };
 
         Measure.prototype.addNote = function (note) {
@@ -173,6 +175,12 @@ angular.module('tabApp')
             console.log('dist: ' + d);
         };
         
+        Measure.prototype.findNotesAtPos = function (pos) {
+            return this.content.filter(function(n){
+                return n.pos === pos;
+            });
+        };
+        
         Measure.prototype.onNoteMoving = function (note) {
             this.setMovedNoteDuration(note);
             
@@ -217,14 +225,14 @@ angular.module('tabApp')
             //console.log('note bounds: ' + this._getNoteDuration(this.getNoteBounds(note)));
         };
 
-        Measure.prototype.moveNotePosition = function (note, amount) {
+        Measure.prototype.moveNotePosition = function (note, amount, skipNotes) {
             var moveIncr;
             if (amount >= 0) {
                 var minDur = 1 / this.getSubdivisions(),
-                    nextDist = this.findNextNoteDistance(note);
+                    nextDist = this.findNextNoteDistance(note, '', skipNotes);
                 moveIncr = Math.max(Math.min(amount, nextDist - minDur), 0);
             } else {
-                var prevDist = this.findPreviousNoteDistance(note);
+                var prevDist = this.findPreviousNoteDistance(note, '', skipNotes);
                 moveIncr = Math.max(amount, -prevDist);
             }
             
@@ -272,20 +280,48 @@ angular.module('tabApp')
             return this.beatType || this.song.beatType;
         };
 
+        Measure.prototype.setBeatCount = function(beatCount) {
+            this.beatCount = beatCount;
+        };
+        
+        Measure.prototype.setBeatType = function(beatType) {
+            this.beatType = beatType;
+        };
+    
+        Measure.prototype.setRuler = function() {
+            if (this.song) {
+                var subdiv = this.getSubdivisions(),
+                    r = this.song.getRuler(this.getBeatCount(), subdiv),
+                    dur = 1/subdiv;
+                    
+                var arr = [];
+                for (var i = 0; i < r.length; i++) {
+                    var pos = 1 + i * dur;
+                    arr.push({'subd': r[i], 'pos': pos});
+                }
+                
+                this.ruler = arr;
+            }
+        };
+
         /**
          * 
          * @param {type} note
          * @param {type} string
+         * @param {Array} skipNotes an array of notes to not consider when finding the
+         *      distance
          * @returns {Number}
          */
-        Measure.prototype.findPreviousNoteDistance = function (note, string) {
+        Measure.prototype.findPreviousNoteDistance = function (note, string, skipNotes) {
             string = string || note.string;
+            skipNotes = skipNotes || [];
 
             // start from right and find the first note before the pos of our note
             // that is on the same string 
             for (var i = this.content.length - 1; i >= 0; i--) {
                 var n = this.content[i];
-                if (n.string !== string || n === note || n.pos > note.pos) {
+                if (n.string !== string || n === note || n.pos > note.pos ||
+                    skipNotes.indexOf(n) >= 0) {
                     continue;
                 }
                 // once that note is found return the distance
@@ -297,8 +333,7 @@ angular.module('tabApp')
             if (this.prevMeasure) {
                 var n = new Note(note);
                 n.pos = this.prevMeasure.getBeatCount() + 1;
-                outsideMeasureDist = this.prevMeasure.findPreviousNoteDistance(n);
-                
+                outsideMeasureDist = this.prevMeasure.findPreviousNoteDistance(n, n.string, skipNotes);
             }
             console.log('has prev measure dist: ' + outsideMeasureDist + ' pos ' + note.pos);
             return outsideMeasureDist + note.pos - 1;
@@ -308,16 +343,19 @@ angular.module('tabApp')
          * 
          * @param {type} note
          * @param {type} string
+         * @param {Array} skipNotes an array of notes to not consider when finding the
+         *      distance
          * @returns {Number}
          */
-        Measure.prototype.findNextNoteDistance = function (note, string) {
+        Measure.prototype.findNextNoteDistance = function (note, string, skipNotes) {
             string = string || note.string;
+            skipNotes = skipNotes || [];
 
             // start from left and find the first note after the pos of our note
             // that is on the same string
             for (var i = 0; i < this.content.length; i++) {
                 var n = this.content[i];
-                if (n.string !== string || n === note) {
+                if (n.string !== string || n === note || skipNotes.indexOf(n) >= 0) {
                     continue;
                 }
                 // once that note is found return the difference in pos
@@ -332,7 +370,7 @@ angular.module('tabApp')
             if (this.nextMeasure) {
                 var n = new Note(note);
                 n.pos = 1;
-                outsideMeasureDist = this.nextMeasure.findNextNoteDistance(n);
+                outsideMeasureDist = this.nextMeasure.findNextNoteDistance(n, n.string, skipNotes);
                 //console.log('has next measure dist: ' + outsideMeasureDist);
             }
             // no note found, so return space left in measure
@@ -345,15 +383,18 @@ angular.module('tabApp')
          * @param {type} strings
          * @returns {Array}
          */
-        Measure.prototype.allStringOptionsForNote = function (note, strings) {
+        Measure.prototype.allStringOptionsForNote = function (note, strings, skipNotes) {
             var blockedStrings = {};
+            skipNotes = skipNotes || [];
+            strings = strings || this.song.strings;
 
             // start from left and find a note that has an overlapping interval
             for (var i = 0; i < this.content.length; i++) {
                 var n = this.content[i];
                 // continue if the note.pos is outside another note's interval
                 // occurring at the end of interval is ok, but not at the beginning
-                if (n.string === note.string || note.pos >= n.pos + n.dur || note.pos < n.pos) {
+                if (n.string === note.string || note.pos >= n.pos + n.dur 
+                    || note.pos < n.pos || skipNotes.indexOf(n) >= 0) {
                     continue;
                 }
 

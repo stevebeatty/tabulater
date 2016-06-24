@@ -5,6 +5,7 @@ angular.module('tabApp')
 
         function Song(obj) {
             this.measures = [];
+            this.rulers = {};
 
             if (angular.isObject(obj)) {
                 this.subdivisions = obj.subdivisions || 1;
@@ -123,6 +124,32 @@ angular.module('tabApp')
                 if (this.measures.length > 0) {
                     this.linkMeasureBefore(idx);
                 }
+            }
+        };
+        
+        Song.prototype._insertBetween = function (arr, value) {
+            var size = 2 * arr.length;
+            for (var i = 1; i < size; i += 2) {
+                arr.splice(i, 0, value);
+            }
+        };
+        
+        Song.prototype.getRuler = function (beatCount, subdivision) {
+            var index = beatCount + '/' + subdivision;
+
+            if (index in this.rulers) {
+                return this.rulers[index];
+            } else {
+                var r;
+                if (subdivision === 1) {
+                    r = new Array(beatCount).fill(1);
+                } else {
+                    r = this.getRuler(beatCount, subdivision / 2).slice();
+                    this._insertBetween(r, subdivision);
+                }
+
+                this.rulers[index] = r;
+                return r;
             }
         };
 

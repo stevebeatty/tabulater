@@ -156,5 +156,5 @@ nav {
 }
 
 .btn.disabled, .btn[disabled] {
-    background-color: #cccccc;
+    opacity: 0.5;
 };

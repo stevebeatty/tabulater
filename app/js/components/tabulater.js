@@ -17,15 +17,22 @@ angular.module('tabApp').component('tabulater', {
             ctrl.selectedMeasure = null;
             ctrl.selectedNote = null;
             ctrl.selectedNotes = [];
+            ctrl.selectedRulerTick = null;
+            
             ctrl.referenceMeasure = null;
 
             ctrl.editSong = false;
             
             ctrl.lastNoteDuration = 1;
 
-            ctrl.selectMeasure = function (measure, posEl) {
+            ctrl.unselectAll = function() {
                 ctrl.unselectMeasure();
                 ctrl.unselectNote();
+                ctrl.unselectRulerTick();
+            };
+
+            ctrl.selectMeasure = function (measure, posEl) {
+                ctrl.unselectAll();
 
                 ctrl.selectedMeasure = {measure: measure, element: posEl};
                 measure.selected = true;
@@ -74,13 +81,23 @@ angular.module('tabApp').component('tabulater', {
             };
 
             ctrl.selectNote = function (note, position) {
-                ctrl.unselectMeasure();
-                ctrl.unselectNote();
+                ctrl.unselectAll();
                 
                 ctrl.selectedNote = ctrl._setNoteSelection(note, position);
                 console.log('selected note: ' + JSON.stringify(note));
                 
                 ctrl.selectedNotes.push(ctrl.selectedNote);
+            };
+            
+            ctrl.selectNotes = function (notes, position) {
+                ctrl.unselectAll();
+                
+                notes.forEach(function (n) {
+                    var sel = ctrl._setNoteSelection(n, position);
+                    ctrl.selectedNotes.push(sel);
+                });
+                
+                ctrl.selectedNote = ctrl.selectedNotes[0];
             };
             
             ctrl.toggleNoteSelection = function(note, pos) {
@@ -129,6 +146,21 @@ angular.module('tabApp').component('tabulater', {
                 ctrl.unselectAllNotes();
             };
             
+            ctrl.selectRulerTick = function (tick, measure, posEl) {
+                ctrl.unselectAll();
+
+                ctrl.selectedRulerTick = {tick: tick, measure: measure, element: posEl};
+                tick.selected = true;
+            };
+
+            ctrl.unselectRulerTick = function () {
+                console.log('unselect ruler tick');
+                if (ctrl.selectedRulerTick) {
+                    ctrl.selectedRulerTick.tick.selected = false;
+                    ctrl.selectedRulerTick = null;
+                }
+            };
+            
             ctrl.updateNote = function(note, field, value) {
                 // check for multiple update
                 if (angular.isArray(note) && note.length > 1) {
@@ -140,10 +172,14 @@ angular.module('tabApp').component('tabulater', {
                 
                 switch (field) {
                     case 'string':
-                        measure.setNoteString(note, value);
+                        measure.setNoteString(note, note.string + value);
                         break;
                     case 'dur':
                         measure.setNoteDuration(note, value);
+                        ctrl.lastNoteDuration = note.dur;
+                        break;
+                    case 'durInc':
+                        measure.setNoteDuration(note, note.dur + value);
                         ctrl.lastNoteDuration = note.dur;
                         break;
                     case 'pos':
@@ -158,12 +194,28 @@ angular.module('tabApp').component('tabulater', {
             ctrl.updateNotes = function(notes, field, value) {
                 notes.forEach(function(n) {
                     switch (field) {
-                        case 'fret':
+                        // offset the current fret by a value
+                        case 'fret': 
                             n.fret = Math.max(n.fret + value, 0);
+                            break;
+                        // should not be on the same string due to ordering issues
+                        case 'pos': 
+                            n.measure.moveNotePosition(n, value, notes);
+                            break;
+                        // directly set notes' duration
+                        case 'dur':
+                            n.measure.setNoteDuration(n, value);
+                            ctrl.lastNoteDuration = value;
+                            break;
+                        // move the duration by an increment
+                        case 'durInc':
+                            n.measure.setNoteDuration(n, n.dur + value);
+                            break;
+                        case 'string':
+                            n.measure.setNoteString(n, n.string + value);
                             break;
                     }
                 });
-                
             };
             
             ctrl.deleteNote = function(note) {

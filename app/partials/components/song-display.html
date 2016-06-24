@@ -37,13 +37,20 @@
                   x2="100%" ng-attr-y2="{{ $ctrl.rulerBottom()}}em"
                   />
 
-            <g ng-repeat="sub in $ctrl.getRuler(measure) track by $index" >
-                <line ng-attr-class="ruler-tick ruler-tick-{{sub}}"
+            <g ng-repeat="sub in measure.ruler" >
+                <line ng-attr-class="ruler-tick ruler-tick-{{sub.subd}}"
                       ng-attr-x1="{{ $ctrl.rulerTickXPosition(measure, $index)}}em" 
-                      ng-attr-y1="{{ $ctrl.rulerTickHeight(sub)}}em"
+                      ng-attr-y1="{{ $ctrl.rulerTickTop(sub.subd)}}em"
                       ng-attr-x2="{{ $ctrl.rulerTickXPosition(measure, $index)}}em" 
                       ng-attr-y2="{{ $ctrl.rulerBottom()}}em"
                       />
+                
+                <rect ng-class="{transparent: true, clickable: true, 'selected-measure': sub.selected}"
+                  ng-attr-x="{{ $ctrl.rulerTickClickBoxXPosition(measure, $index) }}em" 
+                  ng-attr-y="{{$ctrl.rulerTickClickBoxYPosition()}}em"
+                  ng-attr-width="{{$ctrl.rulerTickClickBoxWidth()}}em" 
+                  ng-attr-height="{{$ctrl.rulerTickHeight(1)}}em"
+                  ng-click="$ctrl.clickRulerTick($event, measure, sub)" />
             </g>
         </g>
 

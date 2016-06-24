@@ -74,6 +74,14 @@ angular.module('tabApp').component('songDisplay', {
 
             ctrl.parent.selectMeasure(measure, rulerEl);
         };
+        
+        ctrl.clickRulerTick = function (event, measure, tick) {
+            console.log('click tick');
+            if (!ctrl.parent.editSong)
+                return;
+
+            ctrl.parent.selectRulerTick(tick, measure, $(event.target));
+        };
 
         ctrl.clickNote = function (event, note) {
             console.log(event);
@@ -155,8 +163,8 @@ angular.module('tabApp').component('songDisplay', {
             var dur = note.dur || 1;
             var maxDur = measure.getBeatCount() - note.pos + 1;
             if (dur > maxDur) {
-                    console.log("max maxDur < dur : " + maxDur + " < " + dur);
-                }
+                console.log("max maxDur < dur : " + maxDur + " < " + dur);
+            }
             var re = ctrl.notePositionDistance(measure, Math.min(dur, maxDur), 0);
             return re;
         };
@@ -176,9 +184,26 @@ angular.module('tabApp').component('songDisplay', {
         ctrl.rulerTickXPosition = function (measure, index) {
             return ctrl.noteXPosition(measure, 1 + index / measure.getSubdivisions());
         };
+        
+        ctrl.rulerTickClickBoxXPosition = function (measure, index) {
+            return ctrl.noteXPosition(measure, 1 + index / measure.getSubdivisions())
+                - ctrl.rulerTickClickBoxWidth()/2;
+        };
+        
+        ctrl.rulerTickClickBoxYPosition = function () {
+            return ctrl.rulerTickTop(1);
+        };
+
+        ctrl.rulerTickClickBoxWidth = function () {
+            return ctrl.measureClickBoxWidth();
+        };
+
+        ctrl.rulerTickTop = function (subdiv) {
+            return ctrl.rulerBottom() - ctrl.rulerTickHeight(subdiv);
+        };
 
         ctrl.rulerTickHeight = function (subdiv) {
-            return ctrl.rulerBottom() - 0.15 * ctrl.stringOffset - 0.65 * ctrl.stringOffset / subdiv;
+            return 0.15 * ctrl.stringOffset + 0.65 * ctrl.stringOffset / subdiv;
         };
 
         ctrl.rulerBottom = function () {

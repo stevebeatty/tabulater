@@ -55,26 +55,16 @@ angular.module('tabApp').directive('noteEditPanel', [ function () {
             ctrl.updateState();
         };
         
-        ctrl.updateString = function() {
-            ctrl.updateNote('string', ctrl.string);
+        ctrl.updateString = function(dir) {
+            ctrl.updateNote('string', dir);
             ctrl.updateState();
         };
         
-        ctrl.updateState = function () {
-            var notes = ctrl.getNotesFromSelection(),
-                allNextDist = notes.map(function(note) {
-                                    return note.measure.findNextNoteDistance(note);
-                               }),
-                allPrevDist = notes.map(function(note) {
-                                    return note.measure.findPreviousNoteDistance(note);
-                               }),
-                allMinDur =   notes.map(function(note){
-                                    return 1 / note.measure.getSubdivisions();
-                               });
-                               
+        ctrl._setEffectiveFret = function (notes) {
             ctrl.lowStringFret = 0;
             var lowString = 0;
             notes.forEach(function(n) {
+                // find the effective low string and the fret on that string
                if (n.string > lowString) {
                    lowString = n.string;
                    ctrl.lowStringFret = n.fret;
@@ -86,10 +76,36 @@ angular.module('tabApp').directive('noteEditPanel', [ function () {
             });
             
             ctrl.fret = ctrl.lowStringFret;
+        };
+        
+        ctrl._hasDupeStrings = function(notes) {
+            var sameStringSelected = false,
+                usedStrings = {};
+            notes.forEach(function(n) {
+               if (n.string in usedStrings) {
+                   sameStringSelected = true;
+               } else {
+                   usedStrings[n.string] = true;
+               }
+            });
             
-            console.log('low string fret: ' + ctrl.lowStringFret);
-            
-            console.log(allNextDist);
+            return sameStringSelected;
+        };
+        
+        ctrl.updateState = function () {
+            var notes = ctrl.getNotesFromSelection(),
+                allNextDist = notes.map(function(note) {
+                                    return note.measure.findNextNoteDistance(note, '', notes);
+                               }),
+                allPrevDist = notes.map(function(note) {
+                                    return note.measure.findPreviousNoteDistance(note, '', notes);
+                               }),
+                allMinDur =   notes.map(function(note){
+                                    return 1 / note.measure.getSubdivisions();
+                               });
+                               
+            ctrl._setEffectiveFret(notes);
+            var sameStringSelected = ctrl._hasDupeStrings(notes);
             
             ctrl.hasMultipleSelection = notes.length > 1;
             
@@ -99,11 +115,12 @@ angular.module('tabApp').directive('noteEditPanel', [ function () {
 
             console.log('next dist ' + nextDist + ' prevDist ' + prevDist + ' mindur: ' + minDur);
 
-            ctrl.updateMoveOptions(prevDist, nextDist, minDur);
+            ctrl.updateMoveOptions(prevDist, nextDist, minDur, sameStringSelected);
             ctrl.updateBeatOptions(nextDist, minDur);
-
+            ctrl.updateStringOptions(notes);
+            
             ctrl.availableStrings = ctrl.note.measure.allStringOptionsForNote(
-                ctrl.note, ctrl.song.strings);
+                ctrl.note, ctrl.song.strings, notes);
         };
 
         ctrl.getNotesFromSelection = function () {
@@ -112,18 +129,33 @@ angular.module('tabApp').directive('noteEditPanel', [ function () {
             });
         };
 
-        ctrl.updateMoveOptions = function (prevDist, nextDist, minDur) {
-            ctrl.canMoveBackward = prevDist > 0;
-            ctrl.canMoveForward = (nextDist - minDur > 0);
+        ctrl.updateMoveOptions = function (prevDist, nextDist, minDur, dupeStringSelected) {
+            ctrl.canMoveBackward = dupeStringSelected ? false : prevDist > 0;
+            ctrl.canMoveForward = dupeStringSelected ? false : (nextDist - minDur > 0);
+        };
+        
+        ctrl.updateStringOptions = function (notes) {
+            // can the notes be moved up or down on the strings
+            var stringOps = notes.reduce(function(total, n) {
+                var ops = n.measure.allStringOptionsForNote(n, ctrl.song.strings, notes);
+                total.up = total.up && (ops.indexOf(n.string - 1) >= 0);
+                total.down = total.down && (ops.indexOf(n.string + 1) >= 0);
+                console.log(ops);
+                return total;
+            }, {'up': true, 'down': true});
+
+            console.log(stringOps);
+            ctrl.canMoveStringUp = stringOps.up;
+            ctrl.canMoveStringDown = stringOps.down;
         };
 
         ctrl.increaseBeats = function () {
-            ctrl.updateNote('dur', ctrl.beatChangeValue.value + ctrl.note.dur);
+            ctrl.updateNote('durInc', ctrl.beatChangeValue.value);
             ctrl.updateState();
         };
 
         ctrl.decreaseBeats = function () {
-            ctrl.updateNote('dur', ctrl.note.dur - ctrl.beatChangeValue.value);
+            ctrl.updateNote('dur', -ctrl.beatChangeValue.value);
             ctrl.updateState();
         };
 

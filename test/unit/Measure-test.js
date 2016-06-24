@@ -81,6 +81,22 @@ describe('Measure', function() {
           expect(measure.findPreviousNoteDistance({
               "pos": 4, "dur": 0.5, "string": 3, "fret": 0})).toBe(3);
         });
+        
+        it('should skip notes if required', function() {
+            console.log('testing skip');
+          expect(measure.findPreviousNoteDistance({
+              "pos": 3, "dur": 0.5, "string": 1, "fret": 0}, '', measure.content)).toBe(2);
+          
+          expect(measure.findPreviousNoteDistance({
+              "pos": 3, "dur": 0.5, "string": 1, "fret": 0}, '', [measure.content[0]])).toBe(0.5);
+          
+          expect(measure.findPreviousNoteDistance({
+              "pos": 3, "dur": 0.5, "string": 1, "fret": 0}, '', [measure.content[1]])).toBe(0.5);
+          
+          expect(measure.findPreviousNoteDistance({
+              "pos": 3, "dur": 0.5, "string": 1, "fret": 0}, '', [measure.content[3]])).toBe(1.25);
+;
+        });
       
     });
     
@@ -92,6 +108,9 @@ describe('Measure', function() {
           
           expect(measure.findNextNoteDistance({
               "pos": 4, "dur": 1, "string": 1, "fret": 0})).toBe(1.0);
+          
+          expect(measure.findNextNoteDistance({
+              "pos": 1, "dur": 1, "string": 3, "fret": 0})).toBe(4.0);
         });
         
         it('has next note distance of 0 for overlaps', function() {
@@ -100,6 +119,17 @@ describe('Measure', function() {
           
           expect(measure.findNextNoteDistance({
               "pos": 1.5, "dur": 1, "string": 2, "fret": 0})).toBe(0);
+        });
+        
+        it('should skip notes if required', function() {
+          expect(measure.findNextNoteDistance({
+              "pos": 1, "dur": 0.5, "string": 1, "fret": 0}, '' , measure.content)).toBe(4);
+          
+          expect(measure.findNextNoteDistance({
+              "pos": 1.5, "dur": 1, "string": 2, "fret": 0}, '' , measure.content)).toBe(3.5);
+          
+          expect(measure.findNextNoteDistance({
+              "pos": 1.25, "dur": 1, "string": 2, "fret": 0}, '' , [measure.content[2]])).toBe(3.75);
         });
         
     });
