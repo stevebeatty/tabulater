@@ -44,6 +44,7 @@ angular.module('tabApp')
         };
 
         Measure.prototype._pushNote = function(note) {
+            this.setMovedNoteDuration(note);
             this.content.push(note);
             this.sortMeasure();
             this.onNoteMoved(note); 

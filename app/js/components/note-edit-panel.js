@@ -45,6 +45,10 @@ angular.module('tabApp').directive('noteEditPanel', [ function () {
             ctrl.onDelete({note: ctrl.note});
             ctrl.close();
         };
+        
+        ctrl.copySelectedNotes = function() {
+            ctrl.tabulater.setReferenceNotes();
+        };
 
         ctrl.updateFret = function() {
             if (ctrl.hasMultipleSelection) {
@@ -140,11 +144,11 @@ angular.module('tabApp').directive('noteEditPanel', [ function () {
                 var ops = n.measure.allStringOptionsForNote(n, ctrl.song.strings, notes);
                 total.up = total.up && (ops.indexOf(n.string - 1) >= 0);
                 total.down = total.down && (ops.indexOf(n.string + 1) >= 0);
-                console.log(ops);
+                //console.log(ops);
                 return total;
             }, {'up': true, 'down': true});
 
-            console.log(stringOps);
+            //console.log(stringOps);
             ctrl.canMoveStringUp = stringOps.up;
             ctrl.canMoveStringDown = stringOps.down;
         };
@@ -200,6 +204,9 @@ angular.module('tabApp').directive('noteEditPanel', [ function () {
     return {
         templateUrl: 'partials/components/note-edit-panel.html',
         controller: NoteEditCtrl,
+        require: {
+            tabulater: '^tabulater'
+        },
         link: function (scope, element, attrs) {
             scope.$ctrl.element = element;
             scope.$ctrl.linked = true;

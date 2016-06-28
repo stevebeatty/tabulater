@@ -13,8 +13,11 @@ angular.module('tabApp').directive('rulerTickEditPanel', ['$timeout', function (
 
       ctrl.$onChanges = function(changes) {
         //console.log('changes: ' + JSON.stringify(changes));
+        
+        if (!ctrl.selectedRulerTick) return;
+        
         ctrl.tick = ctrl.selectedRulerTick.tick;
-        console.log(ctrl.tick);
+        //console.log(ctrl.tick);
         ctrl.setAvailableStrings();
         
         if (ctrl.linked) {
@@ -26,7 +29,7 @@ angular.module('tabApp').directive('rulerTickEditPanel', ['$timeout', function (
         var ch = $(ctrl.element.children()[0]),
           el = ctrl.selectedRulerTick.element,
           height = el[0].getBBox().height;
-          console.log(el[0]);
+         // console.log(el[0]);
         ch.position({
           my: 'center top',
           at: 'center bottom+' + (height),
@@ -51,34 +54,19 @@ angular.module('tabApp').directive('rulerTickEditPanel', ['$timeout', function (
           ctrl.availableStrings = strings;
       };
 
-      ctrl.insertAfter = function() {
-        ctrl.tabulater.insertMeasure('after');
-        ctrl.updatePos();
+      ctrl.pasteNotes = function() {
+        ctrl.tabulater.pasteNotes(ctrl.selectedRulerTick.tick.pos, ctrl.selectedRulerTick.measure);
+      };
+      
+      ctrl.canPaste = function() {
+          if (ctrl.referenceNotes.length === 0) return false;
+          return ctrl.referenceNotes.every(function(el) {
+              var i = ctrl.availableStrings.indexOf(el.note.string);
+              //console.log(el.note.string + ' ' + i + ' ' + ctrl.availableStrings);
+              return i >= 0;
+          });
       };
 
-      ctrl.insertBefore = function() {
-        ctrl.tabulater.insertMeasure('before');
-        ctrl.updatePos();
-      };
-      
-      ctrl.pasteAfter = function() {
-        ctrl.tabulater.pasteMeasure('after');
-        ctrl.updatePos();
-      };
-
-      ctrl.pasteBefore = function() {
-        ctrl.tabulater.pasteMeasure('before');
-        ctrl.updatePos();
-      };
-      
-      ctrl.hasReference = function() {
-          ctrl.tabulater.referenceMeasure !== null;
-      };
-      
-      ctrl.copyMeasure = function() {
-          ctrl.tabulater.setReferenceMeasure(ctrl.measure);
-      };
-      
       ctrl.selectNotesAtTick = function() {
           var notes = ctrl.selectedRulerTick.measure.findNotesAtPos(ctrl.selectedRulerTick.tick.pos);
           
@@ -107,9 +95,15 @@ angular.module('tabApp').directive('rulerTickEditPanel', ['$timeout', function (
       scope.$ctrl.element = element;
       scope.$ctrl.linked = true;
       scope.$ctrl.position();
+      
+      scope.$watchCollection('$ctrl.referenceNotes', function(newValues, oldValues) {
+            console.log('watching ref.');
+            
+        });
     },
     bindToController: {
       selectedRulerTick: '<',
+      referenceNotes: '<',
       close: '&',
       insertMeasure: '&'
     },

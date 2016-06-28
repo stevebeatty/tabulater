@@ -49,11 +49,14 @@
         <select class="form-control" style="width: auto; display: inline-block" ng-change="$ctrl.updateState()" ng-model="$ctrl.moveValue" ng-options="o as o.label for o in $ctrl.beatChangeAmounts"></select>
       </div>   
       <div class="form-group">
-        <label>Delete</label>
+        <label>Ops</label>
         <button type="button" ng-click="$ctrl.deleteNote()" class="btn btn-default" aria-label="">
-          <span class="glyphicon glyphicon-ban-circle" aria-hidden="true"></span>
+          <span aria-hidden="true">Delete</span>
         </button>
         {{$ctrl.selectedNotes.length}}
+        <button type="button" ng-click="$ctrl.copySelectedNotes()" class="btn btn-default" aria-label="">
+          <span aria-hidden="true">Copy</span>
+        </button>
       </div>
     </form>  
   </div>

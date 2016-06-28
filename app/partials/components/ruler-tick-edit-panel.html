@@ -12,6 +12,14 @@
           <span class="" aria-hidden="true">Notes</span>
         </button>
       </div>
+        <div class="form-group">
+        <label>Paste</label>
+        <button type="button" ng-disabled="!$ctrl.canPaste()" 
+           ng-click="$ctrl.pasteNotes()" class="btn btn-default" aria-label="">
+          <span class="" aria-hidden="true">Copied Notes</span>
+        </button>
+        {{$ctrl.referenceNotes.length}}
+      </div>
     </form>
   </div>
 </div>

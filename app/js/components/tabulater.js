@@ -3,8 +3,8 @@
 angular.module('tabApp').component('tabulater', {
     templateUrl: 'partials/components/tabulater.html',
     controllerAs: 'tabCtrl',
-    controller: ['$scope', '$uibModal', 'Measure', 'Song', 'soundService',
-        function ($scope, $uibModal, Measure, Song, soundService) {
+    controller: ['$scope', '$uibModal', 'Measure', 'Song', 'Note', 'soundService',
+        function ($scope, $uibModal, Measure, Song, Note, soundService) {
 
             var ctrl = this;
 
@@ -20,6 +20,7 @@ angular.module('tabApp').component('tabulater', {
             ctrl.selectedRulerTick = null;
             
             ctrl.referenceMeasure = null;
+            ctrl.referenceNotes = [];
 
             ctrl.editSong = false;
             
@@ -52,9 +53,11 @@ angular.module('tabApp').component('tabulater', {
 
             ctrl.insertMeasure = function (where) {
                 if (where === 'before') {
-                    soundService.song.insertMeasureBefore(ctrl.selectedMeasure.measure, new Measure());
+                    soundService.song.insertMeasureBefore(ctrl.selectedMeasure.measure,
+                    new Measure({}, soundService.song));
                 } else {
-                    soundService.song.insertMeasureAfter(ctrl.selectedMeasure.measure, new Measure());
+                    soundService.song.insertMeasureAfter(ctrl.selectedMeasure.measure, 
+                    new Measure({}, soundService.song));
                 }
             };
             
@@ -66,6 +69,21 @@ angular.module('tabApp').component('tabulater', {
                     soundService.song.insertMeasureAfter(ctrl.selectedMeasure.measure, 
                     new Measure(ctrl.referenceMeasure, soundService.song));
                 }
+            };
+
+            ctrl.pasteNotes = function (pos, measure) {
+                console.log('paste at: ' + pos);
+                var notes = ctrl.referenceNotes.map(function (n) {
+                    var nt = new Note(n.note);
+                    nt.pos = pos;
+                    
+                    return nt;
+                });
+                
+                console.log(notes);
+                notes.forEach(function(n) {
+                    measure.addNote(n);
+                });
             };
 
             ctrl.deleteSelectedMeasure = function () {
@@ -144,6 +162,12 @@ angular.module('tabApp').component('tabulater', {
                 }
                 
                 ctrl.unselectAllNotes();
+            };
+            
+            ctrl.setReferenceNotes = function() {
+                ctrl.referenceNotes.length = 0;
+                Array.prototype.push.apply(ctrl.referenceNotes, ctrl.selectedNotes);
+                console.log('reference notes set');
             };
             
             ctrl.selectRulerTick = function (tick, measure, posEl) {
